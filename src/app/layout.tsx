@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "القوة العربية - Arabic Power Calculator",
-  description: "حساب القوة الرقمية للنصوص العربية بدقة الكسر المطلق",
+  title: "القوة العربية - نظام الحساب الرقمي الدقيق",
+  description: "حساب القوة الرقمية للنصوص العربية بدقة كسرية تامة عبر 4 دورات متتابعة",
 };
 
 export const viewport: Viewport = {

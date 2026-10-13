@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Lock, User, Sparkles, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Lock, User, AlertCircle, ShieldCheck, Calculator } from 'lucide-react';
 
 // Hardcoded credentials
 const VALID_USERNAME = 'admin';
@@ -45,14 +45,14 @@ export default function LoginForm() {
         <div className="hidden lg:flex flex-col justify-between p-10 bg-slate-900 text-white relative overflow-hidden">
           <div className="relative z-10">
             <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30 mb-8 text-white">
-              <Sparkles className="w-7 h-7 text-amber-300" />
+              <Calculator className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-4xl font-black text-white leading-tight mb-4">
               القوة العربية <br />
               <span className="text-blue-400 font-black">الحساب الرقمي الدقيق</span>
             </h1>
             <p className="text-slate-300 text-sm leading-relaxed max-w-sm">
-              نظام رياضي فائق الدقة (Arbitrary-Precision) لتفكيك وتحليل النصوص العربية عبر 4 دورات متتابعة بنظام كسري خالص.
+              نظام رياضي فائق الدقة لتفكيك وتحليل النصوص العربية عبر 4 دورات متتابعة بنظام كسري خالص.
             </p>
           </div>
 
@@ -67,7 +67,7 @@ export default function LoginForm() {
           <div className="space-y-2 lg:hidden text-center">
             <div className="flex justify-center mb-3">
               <div className="w-12 h-12 rounded-xl bg-blue-700 flex items-center justify-center text-white shadow-md">
-                <Sparkles className="w-6 h-6 text-amber-300" />
+                <Calculator className="w-6 h-6 text-white" />
               </div>
             </div>
             <h2 className="text-2xl font-black text-slate-900">القوة العربية</h2>
@@ -121,19 +121,12 @@ export default function LoginForm() {
               className="w-full h-12 bg-blue-700 hover:bg-blue-800 text-white font-bold text-base rounded-xl shadow-md shadow-blue-700/20 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               disabled={isLoading}
             >
-              {isLoading ? (
-                <span>جاري التحقق...</span>
-              ) : (
-                <>
-                  <span>دخول للنظام</span>
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                </>
-              )}
+              {isLoading ? <span>جاري التحقق...</span> : <span>دخول للنظام</span>}
             </Button>
           </form>
 
-          <p className="text-center text-slate-400 text-xs font-medium pt-4 border-t border-slate-100">
-            Arabic Power Calculator • 4 Iterations Engine
+          <p className="text-center text-slate-500 text-xs font-bold pt-4 border-t border-slate-100">
+            مشروع القوة العربية • محرك الحساب الرقمي عبر 4 دورات متتابعة
           </p>
         </div>
       </div>

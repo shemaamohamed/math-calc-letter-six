@@ -6,7 +6,7 @@ import ArabicInput from './ArabicInput';
 import ResultView from './ResultView';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Calculator, Loader2 } from 'lucide-react';
+import { Calculator, Loader2 } from 'lucide-react';
 
 interface WordCalculatorUIProps {
   initialText?: string;
@@ -58,10 +58,7 @@ export default function WordCalculatorUI({ initialText = '' }: WordCalculatorUIP
                 <span className="font-semibold text-white">جاري الحساب الكسري عبر 4 دورات...</span>
               </div>
             ) : (
-              <div className="flex items-center justify-center gap-2">
-                <span>بدء الحساب الرقمي (Arbitrary-Precision)</span>
-                <Sparkles className="w-4 h-4 text-amber-300" />
-              </div>
+              <span>بدء الحساب الرقمي (4 دورات)</span>
             )}
           </Button>
         </CardContent>
