@@ -47,7 +47,7 @@ export default function ArabicInput({ value, onChange }: ArabicInputProps) {
           value={value}
           onChange={handleChange}
           placeholder="اكتب أو الصق النص العربي هنا (مثال: مدد، جليل)..."
-          className="relative min-h-[110px] text-lg sm:text-xl font-bold bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 text-slate-900 placeholder:text-slate-400 rounded-xl p-3.5 transition-all duration-200 resize-none leading-relaxed shadow-sm"
+          className="relative min-h-[110px] text-lg sm:text-xl font-bold bg-white border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 text-slate-900 placeholder:text-slate-400 rounded-xl p-3.5 transition-all duration-150 resize-none leading-relaxed shadow-2xs"
           dir="rtl"
           spellCheck={false}
         />

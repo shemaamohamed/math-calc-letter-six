@@ -1,0 +1,46 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e3]:
+    - banner [ref=f6e4]:
+      - generic [ref=f6e9]:
+        - heading "القوة العربية" [level=1] [ref=f6e10]
+        - paragraph [ref=f6e11]: نظام الحساب الرياضي الدقيق عبر 4 دورات متتابعة
+      - button "تسجيل الخروج" [ref=f6e12] [cursor=pointer]
+    - main [ref=f6e13]:
+      - generic [ref=f6e14]:
+        - generic [ref=f6e15]:
+          - generic [ref=f6e16]: لوحة الإدخال والتحليل الرقمي
+          - generic [ref=f6e21]:
+            - generic [ref=f6e22]:
+              - generic [ref=f6e23]:
+                - generic [ref=f6e24]: النص العربي المستهدف
+                - generic [ref=f6e27]: إدخال عربي
+              - textbox "النص العربي المستهدف" [ref=f6e29]:
+                - /placeholder: "اكتب أو الصق النص العربي هنا (مثال: مدد، جليل)..."
+            - button "بدء الحساب الرقمي (4 دورات)" [disabled]
+        - generic [ref=f6e30]:
+          - generic [ref=f6e31]:
+            - generic [ref=f6e32]: 100%
+            - generic [ref=f6e33]: دقة كسرية تامة
+          - generic [ref=f6e34]:
+            - generic [ref=f6e35]: لحظي
+            - generic [ref=f6e36]: أداء فائق بدون تأخير
+        - paragraph [ref=f6e41]:
+          - text: يعمل المحرك آلياً بحساب
+          - strong [ref=f6e42]: 3 دورات مخفية
+          - text: في الخلفية (أساس 260 ثم البذور المستخرجة)، ثم يعرض نتائج
+          - strong [ref=f6e43]: الدورة الرابعة الظاهرة
+          - text: مع زر انتقال تفاعلي لكل سطر.
+      - generic [ref=f6e49]:
+        - paragraph [ref=f6e50]: بانتظار إدخال النص العربي
+        - paragraph [ref=f6e51]: "اكتب أو الصق أي كلمة أو نص عربي في لوحة الإدخال (مثال: مدد) لبدء الحساب المتتابع عبر 4 دورات وعرض الأسطر الكسرية وزر الانتقال."
+    - contentinfo [ref=f6e52]:
+      - generic [ref=f6e53]:
+        - generic [ref=f6e54]:
+          - generic [ref=f6e55]: مشروع القوة العربية
+          - generic [ref=f6e56]: •
+          - generic [ref=f6e57]: نظام الحساب الرقمي الدقيق عبر 4 دورات متتابعة
+        - generic [ref=f6e58]:
+          - generic [ref=f6e59]: "تصميم وتطوير:"
+          - generic [ref=f6e60]: محمود علي
+      - generic [ref=f6e61]: جميع الحقوق محفوظة © 2026
+  - button "Open Next.js Dev Tools" [ref=f6e67] [cursor=pointer]
