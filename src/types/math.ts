@@ -1,6 +1,6 @@
 /**
- * Exact Fractional & Calculation Type Definitions
- * تعريفات الأنواع الرياضية للحساب فائق الدقة (Arbitrary-Precision)
+ * Exact Fractional & Calculation Type Definitions for 4-Iteration Arabic Numerology Calculator
+ * تعريفات الأنواع الرياضية للحساب فائق الدقة (Arbitrary-Precision) عبر 4 دورات متتابعة
  */
 
 export interface FractionType {
@@ -14,84 +14,70 @@ export interface DecimalSquareRootResult {
   fullString: string;
   first10AfterDot: string;
   digitsList: number[];
-  unsimplifiedSum: number; // مجموع أول 10 أرقام بعد الفاصلة (من غير تبسيط)
-  reductionSteps: number[]; // مسار الاختزال الرقمي
-  simplifiedSingleDigit: number; // الرقم المفرد النهائي (بالتبسيط)
+  unsimplifiedSum: number; // مجموع أول 10 أرقام بعد الفاصلة
+  reductionSteps: number[]; // مسار الاختزال الرقمي إلى رقم مفرد
+  simplifiedSingleDigit: number; // الرقم المفرد النهائي
 }
 
 export interface SlotData {
   pos: number;
   char: string;
   originalChar: string;
-  step1Val: number | string;
+  step1Val: number;
   step2Frac: FractionType;
-  step2Formula: string;
   step3Frac: FractionType;
-  step3Formula: string;
   step4GroupFrac: FractionType;
   step5Frac: FractionType;
-  step5Formula: string;
   step6RatioFrac: FractionType;
-  step6Formula: string;
   finalValueFrac: FractionType;
-  finalFormula: string;
   isSelected: boolean;
 }
 
-export interface Phase1Summary {
-  step1Val: number;
-  step1Vals?: number[];
+export interface IterationSummary {
+  iterationIndex: number; // 1 to 4
+  name: string; // e.g. "القسم الأول (المخفي)", "القسم الرابع (الظاهر)"
+  isBackground: boolean; // true for 1, 2, 3; false for 4
+  inputVal: number; // 260 for iter 1, seed for 2..4
   sum1: FractionType;
   sum2: FractionType;
+  step2Fractions: FractionType[];
   step3Fractions: FractionType[];
+  charGroups: Record<string, FractionType>;
+  step5Fractions: FractionType[];
   sum5: FractionType;
-  step6Fractions: FractionType[];
+  step6RatioFractions: FractionType[];
+  finalFractions: FractionType[];
   totalSum: FractionType;
-  average: FractionType;
   sqrtResult: DecimalSquareRootResult;
-  seed: number; // البذرة الناتجة عن القسم الأول المخفي (مثال: 41)
+  extracted10DigitSum: number; // Seed produced for next iteration
 }
 
-export interface Phase2Summary {
-  step1Val: number; // البذرة المأخوذة من القسم الأول
-  sum1: FractionType;
-  sum2: FractionType;
-  slots: SlotData[];
-  selectedCount: number;
-  selectedSum: FractionType;
-  selectedAverage: FractionType;
-
-  // 1. الجواب الأول: الجذر التربيعي لمجموع الخانات المحددة مباشرة (بدون قسمة)
-  directSumSqrtResult: DecimalSquareRootResult;
-  directSumUnsimplifiedAnswer: number; // الناتج لمجموع الخانات مع الجذر (من غير تبسيط)
-  directSumSimplifiedAnswer: number; // الناتج لمجموع الخانات مع الجذر (بالتبسيط)
-  directSumReductionSteps: number[];
-
-  // 2. الجواب الثاني: الجذر التربيعي لـ (المجموع ÷ عدد الخانات)
-  sqrtResult: DecimalSquareRootResult;
-  unsimplifiedAnswer: number; // الناتج مع التقسيم مع الجذر (من غير تبسيط)
-  simplifiedAnswer: number; // الناتج مع التقسيم مع الجذر (بالتبسيط)
-  reductionSteps: number[];
-
-  // 3. الجواب الثالث: مجموع الخانات المحددة بدون جذر تربيعي (No Square Root)
-  directDecimalResult: DecimalSquareRootResult;
-  directDecimalUnsimplifiedAnswer: number; // الناتج لمجموع الخانات بدون جذر (من غير تبسيط)
-  directDecimalSimplifiedAnswer: number; // الناتج لمجموع الخانات بدون جذر (بالتبسيط)
-  directDecimalReductionSteps: number[];
-
-  // 4. الجواب الرابع: (المجموع ÷ عدد الخانات) بدون جذر تربيعي (No Square Root)
-  averageDecimalResult: DecimalSquareRootResult;
-  averageDecimalUnsimplifiedAnswer: number; // الناتج مع التقسيم بدون جذر (من غير تبسيط)
-  averageDecimalSimplifiedAnswer: number; // الناتج مع التقسيم بدون جذر (بالتبسيط)
-  averageDecimalReductionSteps: number[];
+export interface ResultRowItem {
+  pos: number;
+  char: string;
+  originalChar: string;
+  finalFraction: FractionType;
+  finalFractionDisplay: string;
+  isTransferred: boolean;
 }
 
-export interface CalculationState {
+export interface FourIterationCalculationResult {
   inputText: string;
-  normalizedChars: string[];
   rawChars: string[];
+  normalizedChars: string[];
   totalChars: number;
-  phase1: Phase1Summary;
-  phase2: Phase2Summary;
-  selectedIndices: number[];
+  iterations: IterationSummary[]; // All 4 iterations
+  visibleIteration: IterationSummary; // Iteration 4
+  resultRows: ResultRowItem[]; // Rows with transfer toggle for Section 4
+  transferredCount: number;
+  transferredSumFraction: FractionType;
+  transferredSumDisplay: string;
+  transferredSqrtResult: DecimalSquareRootResult;
+  final10DigitSum: number;
+  finalSingleDigit: number;
+  reductionSteps: number[];
 }
+
+// Backwards compatibility alias
+export type DualPhaseResult = FourIterationCalculationResult;
+export type CalculationState = FourIterationCalculationResult;

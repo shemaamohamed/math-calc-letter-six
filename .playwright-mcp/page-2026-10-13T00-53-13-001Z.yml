@@ -1,0 +1,38 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e3]:
+    - banner [ref=f1e4]:
+      - generic [ref=f1e10]:
+        - heading "القوة العربية" [level=1] [ref=f1e11]
+        - paragraph [ref=f1e12]: نظام الحساب الرياضي الدقيق عبر 4 دورات متتابعة (Arbitrary-Precision 4 Iterations)
+      - button "تسجيل الخروج" [ref=f1e13]
+    - main [ref=f1e14]:
+      - generic [ref=f1e15]:
+        - generic [ref=f1e16]:
+          - generic [ref=f1e17]: لوحة الإدخال والتحليل الرقمي
+          - generic [ref=f1e22]:
+            - generic [ref=f1e23]:
+              - generic [ref=f1e24]:
+                - generic [ref=f1e25]: النص العربي المستهدف
+                - generic [ref=f1e28]: إدخال عربي
+              - textbox "النص العربي المستهدف" [ref=f1e30]:
+                - /placeholder: "اكتب أو الصق النص العربي هنا (مثال: مدد، جليل)..."
+            - button "بدء الحساب الرقمي (4 دورات)" [disabled]
+        - generic [ref=f1e31]:
+          - generic [ref=f1e32]:
+            - generic [ref=f1e33]: ١٠٠٪
+            - generic [ref=f1e34]: دقة كسرية تامة
+          - generic [ref=f1e35]:
+            - generic [ref=f1e36]: لحظي
+            - generic [ref=f1e37]: أداء فائق بدون تأخير
+        - paragraph [ref=f1e42]:
+          - text: يعمل المحرك آلياً بحساب
+          - strong [ref=f1e43]: 3 دورات مخفية
+          - text: في الخلفية (أساس 260 ➔ البذور)، ثم يعرض نتائج
+          - strong [ref=f1e44]: الدورة الرابعة الظاهرة
+          - text: مع زر انتقال تفاعلي لكل سطر.
+      - generic [ref=f1e50]:
+        - paragraph [ref=f1e51]: بانتظار إدخال النص العربي
+        - paragraph [ref=f1e52]: "اكتب أو الصق أي كلمة أو نص عربي في لوحة الإدخال (مثال: مدد) لبدء الحساب المتتابع عبر 4 دورات وعرض الأسطر الكسرية وزر الانتقال."
+    - contentinfo [ref=f1e53]:
+      - paragraph [ref=f1e54]: © 2026 مشروع القوة العربية • محرك الحساب الرقمي الدقيق 4 دورات متتابعة
+  - alert [ref=f1e55]

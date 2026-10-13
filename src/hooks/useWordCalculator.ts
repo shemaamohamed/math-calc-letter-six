@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { calculateArabicDualPhase } from '@/lib/calculate';
-import { CalculationState } from '@/types/math';
+import { useState, useCallback } from 'react';
+import { calculateFourIterations } from '@/lib/calculate';
+import { FourIterationCalculationResult } from '@/types/math';
 
 export interface UseWordCalculatorReturn {
   text: string;
   setText: (val: string) => void;
-  result: CalculationState | null;
+  result: FourIterationCalculationResult | null;
   error: string;
   isCalculating: boolean;
-  selectedIndices: number[];
+  transferredIndices: number[];
   calculate: (customText?: string, customIndices?: number[]) => void;
   toggleSlot: (index: number) => void;
   selectAll: () => void;
@@ -20,21 +20,20 @@ export interface UseWordCalculatorReturn {
 }
 
 /**
- * Custom React Hook for Dual-Phase Word Calculator
- * يدير تنفيذ القسم الأول المخفي بالخلفية وحساب القسم الثاني والتفاعل مع أزرار الانتقال
+ * Custom React Hook for 4-Iteration Arabic Numerology Calculator
+ * يدير تنفيذ الدورات الأربعة، والتحكم التفاعلي في أزرار الانتقال (Transfer Buttons)
  */
 export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
   const [text, setTextState] = useState(initialText);
-  const [result, setResult] = useState<CalculationState | null>(null);
-  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+  const [result, setResult] = useState<FourIterationCalculationResult | null>(null);
+  const [transferredIndices, setTransferredIndices] = useState<number[]>([]);
   const [error, setError] = useState('');
   const [isCalculating, setIsCalculating] = useState(false);
 
   const setText = useCallback((newText: string) => {
     setTextState(newText);
     setError('');
-    // Reset selected indices when text changes
-    setSelectedIndices([]);
+    setTransferredIndices([]);
   }, []);
 
   const calculate = useCallback(
@@ -43,39 +42,48 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
       setError('');
 
       if (!targetText.trim()) {
-        setError('الرجاء إدخال نص عربي');
+        setError('الرجاء إدخال نص عربي لبدء الحساب');
         return;
       }
 
       setIsCalculating(true);
 
+      // Instant execution with a micro-timeout for smooth UI state reflection
       setTimeout(() => {
         try {
-          const activeIndices = customIndices !== undefined ? customIndices : (selectedIndices.length > 0 ? selectedIndices : undefined);
-          const calcResult = calculateArabicDualPhase(targetText, activeIndices);
+          const activeIndices =
+            customIndices !== undefined
+              ? customIndices
+              : transferredIndices.length > 0
+              ? transferredIndices
+              : undefined;
+
+          const calcResult = calculateFourIterations(targetText, activeIndices);
           setResult(calcResult);
-          setSelectedIndices(calcResult.selectedIndices);
+          setTransferredIndices(
+            calcResult.resultRows.filter(r => r.isTransferred).map(r => r.pos - 1)
+          );
         } catch (err) {
           setError(err instanceof Error ? err.message : 'حدث خطأ في عملية الحساب');
         } finally {
           setIsCalculating(false);
         }
-      }, 200);
+      }, 50);
     },
-    [text, selectedIndices]
+    [text, transferredIndices]
   );
 
   const toggleSlot = useCallback(
     (index: number) => {
       if (!result) return;
-      const current = result.selectedIndices;
+      const current = result.resultRows.filter(r => r.isTransferred).map(r => r.pos - 1);
       const next = current.includes(index)
         ? current.filter(i => i !== index)
         : [...current, index];
 
-      setSelectedIndices(next);
+      setTransferredIndices(next);
       try {
-        const updated = calculateArabicDualPhase(text, next);
+        const updated = calculateFourIterations(text, next);
         setResult(updated);
       } catch (err) {
         console.error('Error toggling slot:', err);
@@ -86,10 +94,10 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
 
   const selectAll = useCallback(() => {
     if (!result) return;
-    const all = result.phase2.slots.map((_, i) => i);
-    setSelectedIndices(all);
+    const all = result.resultRows.map((_, i) => i);
+    setTransferredIndices(all);
     try {
-      const updated = calculateArabicDualPhase(text, all);
+      const updated = calculateFourIterations(text, all);
       setResult(updated);
     } catch (err) {
       console.error('Error selecting all:', err);
@@ -98,10 +106,9 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
 
   const deselectAll = useCallback(() => {
     if (!result) return;
-    const empty: number[] = [];
-    setSelectedIndices(empty);
+    setTransferredIndices([]);
     try {
-      const updated = calculateArabicDualPhase(text, empty);
+      const updated = calculateFourIterations(text, []);
       setResult(updated);
     } catch (err) {
       console.error('Error deselecting all:', err);
@@ -110,13 +117,14 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
 
   const invertSelection = useCallback(() => {
     if (!result) return;
-    const current = result.selectedIndices;
-    const inverted = result.phase2.slots
+    const current = result.resultRows.filter(r => r.isTransferred).map(r => r.pos - 1);
+    const inverted = result.resultRows
       .map((_, i) => i)
       .filter(i => !current.includes(i));
-    setSelectedIndices(inverted);
+
+    setTransferredIndices(inverted);
     try {
-      const updated = calculateArabicDualPhase(text, inverted);
+      const updated = calculateFourIterations(text, inverted);
       setResult(updated);
     } catch (err) {
       console.error('Error inverting selection:', err);
@@ -126,9 +134,8 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
   const reset = useCallback(() => {
     setTextState('');
     setResult(null);
-    setSelectedIndices([]);
+    setTransferredIndices([]);
     setError('');
-    setIsCalculating(false);
   }, []);
 
   return {
@@ -137,7 +144,7 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
     result,
     error,
     isCalculating,
-    selectedIndices,
+    transferredIndices,
     calculate,
     toggleSlot,
     selectAll,

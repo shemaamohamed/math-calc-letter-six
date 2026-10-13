@@ -1,0 +1,21 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - heading "القوة العربية الحساب الرقمي الدقيق" [level=1] [ref=e10]
+        - paragraph [ref=e11]: نظام رياضي فائق الدقة (Arbitrary-Precision) لتفكيك وتحليل النصوص العربية عبر 4 دورات متتابعة بنظام كسري خالص.
+      - generic [ref=e12]: نظام آمن • دقة كسرية 100% بدون تقريب
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - heading "تسجيل الدخول" [level=2] [ref=e19]
+        - paragraph [ref=e20]: أدخل بياناتك للوصول إلى لوحة الحساب الرقمي
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - text: اسم المستخدم
+          - textbox "admin" [ref=e27]
+        - generic [ref=e28]:
+          - text: كلمة المرور
+          - textbox "••••" [ref=e33]
+        - button "دخول للنظام" [ref=e34] [cursor=pointer]
+      - paragraph [ref=e36]: Arabic Power Calculator • 4 Iterations Engine
+  - alert [ref=e37]
