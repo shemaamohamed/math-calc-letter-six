@@ -1,9 +1,8 @@
 /**
- * Exact Fractional & Calculation Type Definitions for 3-Iteration Arabic Numerology Calculator
- * تعريفات الأنواع الرياضية للحساب فائق الدقة (Arbitrary-Precision) عبر 3 دورات متتابعة
- * - القسم الأول (مخفي): الأساس 260 ➔ استخراج البذرة 1
- * - القسم الثاني (مخفي): الأساس بذرة 1 ➔ استخراج البذرة 2
- * - القسم الثالث (الظاهر): الأساس بذرة 2 ➔ عرض جدول الحروف والكسور مع أزرار الانتقال التفاعلية
+ * Exact Fractional & Calculation Type Definitions for 2-Phase Arabic Numerology Calculator
+ * تعريفات الأنواع الرياضية للحساب فائق الدقة (Arbitrary-Precision) عبر قسمين متتابعين
+ * - القسم الأول (مخفي): الأساس 73 ➔ استخراج البذرة
+ * - القسم الثاني (الظاهر): الأساس البذرة المستخرجة ➔ عرض جدول الحروف والكسور مع أزرار الانتقال التفاعلية
  */
 
 export interface FractionType {
@@ -37,10 +36,10 @@ export interface SlotData {
 }
 
 export interface IterationSummary {
-  iterationIndex: number; // 1, 2, or 3
-  name: string; // "القسم الأول (المخفي)", "القسم الثاني (المخفي)", "القسم الثالث (الظاهر)"
-  isBackground: boolean; // true for 1, 2; false for 3
-  inputVal: number; // 260 for iter 1, seed for 2..3
+  iterationIndex: number; // 1 (القسم الأول المخفي) or 2 (القسم الثاني الظاهر)
+  name: string; // "القسم الأول (المخفي)", "القسم الثاني (الظاهر)"
+  isBackground: boolean; // true for 1; false for 2
+  inputVal: number; // 73 for phase 1, seed for phase 2
   sum1: FractionType;
   sum2: FractionType;
   step2Fractions: FractionType[];
@@ -64,14 +63,14 @@ export interface ResultRowItem {
   isTransferred: boolean;
 }
 
-export interface ThreeIterationCalculationResult {
+export interface TwoPhaseCalculationResult {
   inputText: string;
   rawChars: string[];
   normalizedChars: string[];
   totalChars: number;
-  iterations: IterationSummary[]; // 3 iterations (1, 2, 3)
-  visibleIteration: IterationSummary; // Iteration 3
-  resultRows: ResultRowItem[]; // Rows with transfer toggle for Section 3 Table
+  iterations: IterationSummary[]; // 2 phases: [Phase 1 (Hidden), Phase 2 (Visible)]
+  visibleIteration: IterationSummary; // Phase 2 (Visible)
+  resultRows: ResultRowItem[]; // Rows with transfer toggle for Section 2 Table
   transferredCount: number;
   transferredSumFraction: FractionType;
   transferredSumDisplay: string;
@@ -82,7 +81,8 @@ export interface ThreeIterationCalculationResult {
 }
 
 // Aliases for backwards compatibility
-export type FourIterationCalculationResult = ThreeIterationCalculationResult;
-export type DualPhaseResult = ThreeIterationCalculationResult;
-export type CalculationState = ThreeIterationCalculationResult;
+export type ThreeIterationCalculationResult = TwoPhaseCalculationResult;
+export type FourIterationCalculationResult = TwoPhaseCalculationResult;
+export type DualPhaseResult = TwoPhaseCalculationResult;
+export type CalculationState = TwoPhaseCalculationResult;
 

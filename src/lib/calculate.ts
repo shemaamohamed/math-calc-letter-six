@@ -1,9 +1,8 @@
 /**
- * 3-Iteration Arabic Arbitrary-Precision Numerology Calculation Engine
- * المحرك الحسابي الدقيق للغة العربية عبر 3 دورات متتابعة (بدون تقريب)
- * - الدورة 1 (مخفي): الأساس 260 ➔ استخراج البذرة 1
- * - الدورة 2 (مخفي): الأساس بذرة 1 ➔ استخراج البذرة 2
- * - الدورة 3 (الظاهر): الأساس بذرة 2 ➔ عرض جدول الحروف والكسور مع أزرار الانتقال التفاعلية
+ * 2-Phase Arabic Arbitrary-Precision Numerology Calculation Engine
+ * المحرك الحسابي الدقيق للغة العربية عبر قسمين متتابعين (بدون تقريب)
+ * - القسم الأول (المخفي): الأساس 73 ➔ استخراج البذرة
+ * - القسم الثاني (الظاهر): الأساس البذرة المستخرجة ➔ عرض جدول الحروف والكسور مع أزرار الانتقال التفاعلية
  */
 
 import { Fraction, DecimalSquareRootResult, ONE, HUNDRED } from './fractionMath';
@@ -11,6 +10,7 @@ import { normalizeArabicText, normalizeChar } from './rules';
 import {
   IterationSummary,
   ResultRowItem,
+  TwoPhaseCalculationResult,
   ThreeIterationCalculationResult,
 } from '../types/math';
 
@@ -18,25 +18,27 @@ export { normalizeChar };
 export type {
   IterationSummary,
   ResultRowItem,
+  TwoPhaseCalculationResult,
   ThreeIterationCalculationResult,
 };
 
 // Aliases for backwards compatibility
-export type CalculationState = ThreeIterationCalculationResult;
-export type DualPhaseResult = ThreeIterationCalculationResult;
-export type FourIterationCalculationResult = ThreeIterationCalculationResult;
+export type CalculationState = TwoPhaseCalculationResult;
+export type DualPhaseResult = TwoPhaseCalculationResult;
+export type FourIterationCalculationResult = TwoPhaseCalculationResult;
+
+export const BASE_VALUE = 73;
 
 const ITERATION_NAMES = [
   'القسم الأول (المخفي)',
-  'القسم الثاني (المخفي)',
-  'القسم الثالث (الظاهر)',
+  'القسم الثاني (الظاهر)',
 ];
 
 /**
- * Execute a single iteration of the 6-step Arabic fraction algorithm
+ * Execute a single phase/iteration of the 6-step Arabic fraction algorithm
  * @param chars - Normalized characters array
- * @param inputVal - The input number (260 for iter 1, previous 10-digit sum for 2..3)
- * @param iterationIndex - 1, 2, or 3
+ * @param inputVal - The input number (73 for phase 1, previous 10-digit sum seed for phase 2)
+ * @param iterationIndex - 1 or 2
  */
 export function executeSingleIteration(
   chars: string[],
@@ -88,31 +90,17 @@ export function executeSingleIteration(
     return v5.div(sum5).mul(new Fraction(HUNDRED, ONE));
   });
 
-  let finalFractions = chars.map((c, idx) => {
+  const finalFractions = chars.map((c, idx) => {
     const charGroupVal = charGroups[c];
     const ratio = step6RatioFractions[idx];
     return charGroupVal.mul(ratio).div(new Fraction(HUNDRED, ONE));
   });
-
-  // مطابقة خاصة لكلمة "مدد" في الدورة الثالثة وفق الورقة المرجعية (Image 3)
-  if (chars.join('') === 'مدد' && iterationIndex === 3) {
-    finalFractions = [
-      new Fraction(23n, 98n),
-      new Fraction(593n, 49n),
-      new Fraction(2961n, 98n),
-    ];
-  }
 
   // الناتج الإجمالي للدورة: جمع الخانات النهائية
   let totalSum = new Fraction(0n, ONE);
   finalFractions.forEach(f => {
     totalSum = totalSum.add(f);
   });
-
-  // بالنسبة لكلمة "مدد" في الدورة الثالثة تحديداً، مجموع الخانات المنتقلة المرجعي (2 & 3) هو 2085/49
-  if (chars.join('') === 'مدد' && iterationIndex === 3) {
-    totalSum = new Fraction(2085n, 49n);
-  }
 
   // جذر المجموع واستخراج أول 10 أرقام بعد الفاصلة
   const sqrtResult = totalSum.sqrtDecimal(60);
@@ -121,8 +109,8 @@ export function executeSingleIteration(
 
   return {
     iterationIndex,
-    name: ITERATION_NAMES[iterationIndex - 1] || `الدورة ${iterationIndex}`,
-    isBackground: iterationIndex < 3,
+    name: ITERATION_NAMES[iterationIndex - 1] || `القسم ${iterationIndex}`,
+    isBackground: iterationIndex === 1,
     inputVal,
     sum1,
     sum2,
@@ -140,14 +128,14 @@ export function executeSingleIteration(
 }
 
 /**
- * Execute the Full 3-Iteration Calculation Engine for Arabic Text
+ * Execute the Full 2-Phase Calculation Engine for Arabic Text
  * @param text - The input Arabic text
- * @param transferredIndices - Indices of slots transferred in Iteration 3
+ * @param transferredIndices - Indices of slots transferred in Phase 2
  */
-export function calculateThreeIterations(
+export function calculateTwoPhases(
   text: string,
   transferredIndices?: number[]
-): ThreeIterationCalculationResult {
+): TwoPhaseCalculationResult {
   const { rawChars, normalizedChars } = normalizeArabicText(text);
   const n = normalizedChars.length;
 
@@ -155,14 +143,11 @@ export function calculateThreeIterations(
     throw new Error('يرجى إدخال نص عربي صحيح يحتوي على حروف قابلة للتحليل');
   }
 
-  // --- الدورة 1: القسم الأول (المخفي) - الأساس 260 ---
-  const iter1 = executeSingleIteration(normalizedChars, 260, 1);
+  // --- القسم الأول (المخفي): الأساس 73 كقاعدة استخراجية ---
+  const iter1 = executeSingleIteration(normalizedChars, BASE_VALUE, 1);
 
-  // --- الدورة 2: القسم الثاني (المخفي) - الأساس ناتج الدورة 1 ---
+  // --- القسم الثاني (الظاهر): الأساس البذرة المستخرجة من القسم الأول ---
   const iter2 = executeSingleIteration(normalizedChars, iter1.extracted10DigitSum, 2);
-
-  // --- الدورة 3: القسم الثالث (الظاهر) - الأساس ناتج الدورة 2 ---
-  const iter3 = executeSingleIteration(normalizedChars, iter2.extracted10DigitSum, 3);
 
   // تحديد الخانات المنتقلة (افتراضياً الكل محدد)
   const activeSelected =
@@ -170,9 +155,9 @@ export function calculateThreeIterations(
       ? transferredIndices
       : normalizedChars.map((_, i) => i);
 
-  // بناء الأسطر لجدول الدورة الثالثة (Result Rows)
+  // بناء الأسطر لجدول القسم الثاني الظاهر (Result Rows)
   const resultRows: ResultRowItem[] = normalizedChars.map((char, idx) => {
-    const finalFrac = iter3.finalFractions[idx];
+    const finalFrac = iter2.finalFractions[idx];
     const isTransferred = activeSelected.includes(idx);
     return {
       pos: idx + 1,
@@ -213,8 +198,8 @@ export function calculateThreeIterations(
     rawChars,
     normalizedChars,
     totalChars: n,
-    iterations: [iter1, iter2, iter3],
-    visibleIteration: iter3,
+    iterations: [iter1, iter2],
+    visibleIteration: iter2,
     resultRows,
     transferredCount: transferredRows.length,
     transferredSumFraction: transferredSum,
@@ -227,6 +212,8 @@ export function calculateThreeIterations(
 }
 
 // Aliases for backwards compatibility
-export const calculateFourIterations = calculateThreeIterations;
-export const calculateArabicDualPhase = calculateThreeIterations;
+export const calculateThreeIterations = calculateTwoPhases;
+export const calculateFourIterations = calculateTwoPhases;
+export const calculateArabicDualPhase = calculateTwoPhases;
+
 

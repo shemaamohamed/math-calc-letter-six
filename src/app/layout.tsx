@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "القوة العربية - نظام الحساب الرقمي الدقيق",
-  description: "حساب القوة الرقمية للنصوص العربية بدقة كسرية تامة عبر 4 دورات متتابعة",
+  description: "حساب القوة الرقمية للنصوص العربية بدقة كسرية تامة عبر قسمين متتابعين (الأساس 73)",
 };
 
 export const viewport: Viewport = {

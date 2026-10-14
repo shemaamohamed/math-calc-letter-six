@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { calculateThreeIterations } from '@/lib/calculate';
-import { ThreeIterationCalculationResult } from '@/types/math';
+import { calculateTwoPhases } from '@/lib/calculate';
+import { TwoPhaseCalculationResult } from '@/types/math';
 
 export interface UseWordCalculatorReturn {
   text: string;
   setText: (val: string) => void;
-  result: ThreeIterationCalculationResult | null;
+  result: TwoPhaseCalculationResult | null;
   error: string;
   isCalculating: boolean;
   transferredIndices: number[];
@@ -20,12 +20,12 @@ export interface UseWordCalculatorReturn {
 }
 
 /**
- * Custom React Hook for 3-Iteration Arabic Numerology Calculator
- * يدير تنفيذ الدورات الثلاث، والتحكم التفاعلي في أزرار الانتقال (Transfer Buttons)
+ * Custom React Hook for 2-Phase Arabic Numerology Calculator
+ * يدير تنفيذ القسمين (المخفي أساس 73، والظاهر)، والتحكم التفاعلي في أزرار الانتقال (Transfer Buttons)
  */
 export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
   const [text, setTextState] = useState(initialText);
-  const [result, setResult] = useState<ThreeIterationCalculationResult | null>(null);
+  const [result, setResult] = useState<TwoPhaseCalculationResult | null>(null);
   const [transferredIndices, setTransferredIndices] = useState<number[]>([]);
   const [error, setError] = useState('');
   const [isCalculating, setIsCalculating] = useState(false);
@@ -58,7 +58,7 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
               ? transferredIndices
               : undefined;
 
-          const calcResult = calculateThreeIterations(targetText, activeIndices);
+          const calcResult = calculateTwoPhases(targetText, activeIndices);
           setResult(calcResult);
           setTransferredIndices(
             calcResult.resultRows.filter(r => r.isTransferred).map(r => r.pos - 1)
@@ -83,7 +83,7 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
 
       setTransferredIndices(next);
       try {
-        const updated = calculateThreeIterations(text, next);
+        const updated = calculateTwoPhases(text, next);
         setResult(updated);
       } catch (err) {
         console.error('Error toggling slot:', err);
@@ -97,7 +97,7 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
     const all = result.resultRows.map((_, i) => i);
     setTransferredIndices(all);
     try {
-      const updated = calculateThreeIterations(text, all);
+      const updated = calculateTwoPhases(text, all);
       setResult(updated);
     } catch (err) {
       console.error('Error selecting all:', err);
@@ -108,7 +108,7 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
     if (!result) return;
     setTransferredIndices([]);
     try {
-      const updated = calculateThreeIterations(text, []);
+      const updated = calculateTwoPhases(text, []);
       setResult(updated);
     } catch (err) {
       console.error('Error deselecting all:', err);
@@ -124,7 +124,7 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
 
     setTransferredIndices(inverted);
     try {
-      const updated = calculateThreeIterations(text, inverted);
+      const updated = calculateTwoPhases(text, inverted);
       setResult(updated);
     } catch (err) {
       console.error('Error inverting selection:', err);

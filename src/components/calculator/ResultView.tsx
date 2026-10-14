@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ThreeIterationCalculationResult } from '@/types/math';
+import { TwoPhaseCalculationResult } from '@/types/math';
 import {
   Check,
   CheckSquare,
@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 
 interface ResultViewProps {
-  result: ThreeIterationCalculationResult | null;
+  result: TwoPhaseCalculationResult | null;
   onToggleTransfer?: (index: number) => void;
   onSelectAll?: () => void;
   onDeselectAll?: () => void;
@@ -40,7 +40,7 @@ export default function ResultView({
   const [filterMode, setFilterMode] = useState<'all' | 'transferred' | 'untransferred'>('all');
   // حالة الطي/الفتح لجدول التدقيق الرياضي الشامل
   const [showAuditDetails, setShowAuditDetails] = useState(false);
-  const [auditIterationTab, setAuditIterationTab] = useState<number>(3);
+  const [auditIterationTab, setAuditIterationTab] = useState<number>(2);
 
   if (!result) {
     return null;
@@ -97,7 +97,7 @@ export default function ResultView({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-sm sm:text-base font-black text-slate-900">
-                الناتج النهائي المعتمد (الدورة 3 الظاهرة)
+                الناتج النهائي المعتمد (القسم الثاني الظاهر)
               </h2>
               <span className="text-xs bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-md font-bold border border-emerald-200">
                 {transferredCount} من {totalCount} خانات منتقلة
@@ -140,7 +140,7 @@ export default function ResultView({
       </div>
 
       {/* ============================================================ */}
-      {/* 2. مسار تسلسل الدورات الثلاث المتتابعة (2 مخفية + 1 ظاهرة)     */}
+      {/* 2. مسار تسلسل القسمين المتتابعين (القسم الأول مخفي + القسم الثاني ظاهر) */}
       {/* ============================================================ */}
       <Card className="bg-white border border-slate-200 shadow-sm overflow-hidden rounded-2xl">
         <CardHeader className="py-3 px-4 sm:px-5 bg-slate-50/70 border-b border-slate-200">
@@ -148,55 +148,64 @@ export default function ResultView({
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-blue-700" />
               <CardTitle className="text-xs sm:text-sm font-black text-slate-900">
-                مسار الدورات الثلاث المتتابعة
+                مسار القسمين المتتابعين
               </CardTitle>
             </div>
             <span className="text-xs font-bold text-slate-600 bg-white px-2.5 py-0.5 rounded-full border border-slate-200">
-              دورتان مخفيتان ➔ الدورة الثالثة الظاهرة
+              قسم أول مخفي (أساس 73) ➔ القسم الثاني الظاهر
             </span>
           </div>
         </CardHeader>
         <CardContent className="p-3 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {result.iterations.map((iter, idx) => {
-              const isCurrent = iter.iterationIndex === 3;
+              const isCurrent = iter.iterationIndex === 2;
               return (
                 <div
                   key={idx}
-                  className={`p-3 rounded-xl border transition-all ${
+                  className={`p-3.5 rounded-xl border transition-all ${
                     isCurrent
-                      ? 'bg-blue-50/50 border-blue-300'
+                      ? 'bg-blue-50/50 border-blue-300 shadow-xs'
                       : 'bg-slate-50/50 border-slate-200'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-2">
                     <span
-                      className={`text-xs font-black px-2 py-0.5 rounded ${
+                      className={`text-xs font-black px-2.5 py-0.5 rounded ${
                         isCurrent
                           ? 'bg-blue-700 text-white'
                           : 'bg-slate-200 text-slate-800'
                       }`}
                     >
-                      الدورة {iter.iterationIndex}
+                      {iter.name}
                     </span>
                     {isCurrent ? (
                       <span className="flex items-center gap-1 text-xs text-blue-800 font-bold">
                         <Eye className="w-3.5 h-3.5" />
-                        الظاهر
+                        الظاهر (التفاعلي)
                       </span>
                     ) : (
                       <span className="flex items-center gap-1 text-xs text-slate-500 font-medium">
                         <EyeOff className="w-3.5 h-3.5" />
-                        مخفي
+                        مخفي بالخلفية
                       </span>
                     )}
                   </div>
 
                   <div className="text-xs text-slate-700 font-medium">
-                    المدخل الأساسي: <span className="font-bold font-mono text-slate-900" dir="ltr">{iter.inputVal}</span>
+                    المدخل الأساسي:{' '}
+                    <span className="font-bold font-mono text-slate-900" dir="ltr">
+                      {iter.inputVal}
+                    </span>
+                    {iter.iterationIndex === 1 && (
+                      <span className="text-[11px] text-blue-700 mr-1.5 font-bold">(القاعدة: 73)</span>
+                    )}
+                    {iter.iterationIndex === 2 && (
+                      <span className="text-[11px] text-emerald-700 mr-1.5 font-bold">(البذرة المستخرجة)</span>
+                    )}
                   </div>
-                  <div className="mt-1 flex items-baseline justify-between text-xs pt-1 border-t border-slate-200/80">
-                    <span className="text-slate-500 font-medium">مجموع 10 أرقام:</span>
+                  <div className="mt-2 flex items-baseline justify-between text-xs pt-1.5 border-t border-slate-200/80">
+                    <span className="text-slate-500 font-medium">مجموع 10 أرقام (البذرة):</span>
                     <span
                       className={`font-mono font-black ${
                         isCurrent ? 'text-blue-900 text-sm' : 'text-slate-900'
@@ -214,7 +223,7 @@ export default function ResultView({
       </Card>
 
       {/* ============================================================ */}
-      {/* 3. جدول تحليل الحروف والكسور (القسم الثالث - الظاهر والتفاعلي) */}
+      {/* 3. جدول تحليل الحروف والكسور (القسم الثاني - الظاهر والتفاعلي) */}
       {/* ============================================================ */}
       <Card className="bg-white border border-slate-200 shadow-sm overflow-hidden rounded-2xl">
         <CardHeader className="py-3.5 px-4 sm:px-5 bg-slate-50/80 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -222,7 +231,7 @@ export default function ResultView({
             <div className="flex items-center gap-2">
               <TableIcon className="w-4 h-4 text-emerald-700" />
               <h3 className="text-sm sm:text-base font-black text-slate-900">
-                جدول تحليل الحروف والكسور (الدورة 3 الظاهرة)
+                جدول تحليل الحروف والكسور (القسم الثاني الظاهر)
               </h3>
               <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">
                 {totalCount} حرف
@@ -465,7 +474,7 @@ export default function ResultView({
                   الناتج الرقمي المعتمد
                 </div>
                 <h4 className="text-sm sm:text-base font-black text-slate-900">
-                  مجموع الأرقام العشرة بعد الفاصلة للدورة الثالثة
+                  مجموع الأرقام العشرة بعد الفاصلة للقسم الثاني الظاهر
                 </h4>
               </div>
 
@@ -501,7 +510,7 @@ export default function ResultView({
           <div className="flex items-center gap-2">
             <Calculator className="w-4 h-4 text-slate-600" />
             <span className="text-xs sm:text-sm font-bold text-slate-800">
-              عرض خطوات التدقيق الحسابي التفصيلي (الخطوات 1 إلى 6 للدورات الثلاث)
+              عرض خطوات التدقيق الحسابي التفصيلي (الخطوات 1 إلى 6 للقسمين)
             </span>
           </div>
           <div className="flex items-center gap-1 text-slate-500 text-xs font-medium">
@@ -512,7 +521,7 @@ export default function ResultView({
 
         {showAuditDetails && (
           <CardContent className="p-4 space-y-4">
-            {/* تبويبات الدورات الثلاث */}
+            {/* تبويبات القسمين */}
             <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
               {result.iterations.map(iter => (
                 <button

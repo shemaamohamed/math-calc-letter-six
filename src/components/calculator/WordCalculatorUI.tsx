@@ -34,7 +34,7 @@ export default function WordCalculatorUI({ initialText = '' }: WordCalculatorUIP
           <div className="flex items-center gap-2">
             <Calculator className="w-4 h-4 text-blue-700" />
             <CardTitle className="text-sm font-bold text-slate-800">
-              لوحة الإدخال والتحليل الرقمي (4 دورات)
+              لوحة الإدخال والتحليل الرقمي (قسمين: مخفي وظاهر)
             </CardTitle>
           </div>
         </CardHeader>
@@ -55,10 +55,10 @@ export default function WordCalculatorUI({ initialText = '' }: WordCalculatorUIP
             {isCalculating ? (
               <div className="flex items-center justify-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-white" />
-                <span className="font-semibold text-white">جاري الحساب الكسري عبر 4 دورات...</span>
+                <span className="font-semibold text-white">جاري الحساب الكسري عبر القسمين...</span>
               </div>
             ) : (
-              <span>بدء الحساب الرقمي (4 دورات)</span>
+              <span>بدء الحساب الرقمي (قسمين: مخفي وظاهر)</span>
             )}
           </Button>
         </CardContent>

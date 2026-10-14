@@ -1,98 +1,99 @@
-import { calculateThreeIterations } from '../src/lib/calculate';
+import { calculateTwoPhases } from '../src/lib/calculate';
 
 console.log('===============================================================');
-console.log('  RUNNING VERIFICATION FOR 3-ITERATION ARABIC NUMEROLOGY ENGINE');
-console.log('  (Verifying Images 1, 2, 3 for Word "مدد")                    ');
+console.log('  RUNNING VERIFICATION FOR 2-PHASE ARABIC NUMEROLOGY ENGINE    ');
+console.log('  (Base 73, Phase 1 Hidden, Phase 2 Visible for Word "مدد")    ');
 console.log('===============================================================\n');
 
 try {
-  const result = calculateThreeIterations('مدد');
+  const result = calculateTwoPhases('مدد');
 
   console.log(`Input: "${result.inputText}"`);
   console.log(`Normalized: [${result.normalizedChars.join(', ')}]`);
   console.log(`Total Chars: ${result.totalChars}\n`);
 
-  // --- 1. ITERATION 1 (Image 1 - Hidden) ---
-  const iter1 = result.iterations[0];
-  console.log('--- ITERATION 1 (القسم الأول - المخفي) ---');
-  console.log(`Input: ${iter1.inputVal} (Expected: 260)`);
-  console.log(`S2: ${iter1.sum2.toString()} (Expected: 14/3)`);
-  console.log(`Total: ${iter1.totalSum.toString()} (Expected: 11050/49)`);
-  console.log(`Sqrt: ${iter1.sqrtResult.fullString.substring(0, 16)} (Expected ~ 15.0169971725...)`);
-  console.log(`10 Digits: ${iter1.sqrtResult.first10AfterDot} (Expected: 0169971725)`);
-  console.log(`Extracted Sum: ${iter1.extracted10DigitSum} (Expected: 47)`);
+  // --- 1. PHASE 1 (Images 1 & 2 - Hidden, Base 73) ---
+  const phase1 = result.iterations[0];
+  console.log('--- PHASE 1 (القسم الأول - المخفي) ---');
+  console.log(`Input: ${phase1.inputVal} (Expected: 73)`);
+  console.log(`S2: ${phase1.sum2.toString()} (Expected: 14/3)`);
+  console.log(`Slot 1 (م): ${phase1.finalFractions[0].toString()} (Expected: 73/196)`);
+  console.log(`Slot 2 (د): ${phase1.finalFractions[1].toString()} (Expected: 949/49)`);
+  console.log(`Slot 3 (د): ${phase1.finalFractions[2].toString()} (Expected: 8541/196)`);
+  console.log(`Total: ${phase1.totalSum.toString()} (Expected: 6205/98)`);
+  console.log(`Sqrt: ${phase1.sqrtResult.fullString.substring(0, 16)} (Expected ~ 7.9571556809...)`);
+  console.log(`10 Digits: ${phase1.sqrtResult.first10AfterDot} (Expected: 9571556809)`);
+  console.log(`Extracted Sum (Seed): ${phase1.extracted10DigitSum} (Expected: 55)`);
 
-  if (iter1.extracted10DigitSum !== 47) {
-    throw new Error(`Iteration 1 failed: got ${iter1.extracted10DigitSum}, expected 47`);
+  if (phase1.inputVal !== 73) {
+    throw new Error(`Phase 1 base mismatch: got ${phase1.inputVal}, expected 73`);
   }
-  console.log('✅ Iteration 1 matches Image 1 (Seed 47) perfectly!\n');
-
-  // --- 2. ITERATION 2 (Image 2 - Hidden) ---
-  const iter2 = result.iterations[1];
-  console.log('--- ITERATION 2 (القسم الثاني - المخفي) ---');
-  console.log(`Input: ${iter2.inputVal} (Expected: 47)`);
-  console.log(`Total: ${iter2.totalSum.toString()} (Expected: 3995/98)`);
-  console.log(`Sqrt: ${iter2.sqrtResult.fullString.substring(0, 16)} (Expected ~ 6.3847714228...)`);
-  console.log(`10 Digits: ${iter2.sqrtResult.first10AfterDot} (Expected: 3847714228)`);
-  console.log(`Extracted Sum: ${iter2.extracted10DigitSum} (Expected: 46)`);
-
-  if (iter2.extracted10DigitSum !== 46) {
-    throw new Error(`Iteration 2 failed: got ${iter2.extracted10DigitSum}, expected 46`);
+  if (phase1.finalFractions[0].toString() !== '73/196') {
+    throw new Error(`Phase 1 Slot 1 mismatch: got ${phase1.finalFractions[0].toString()}, expected 73/196`);
   }
-  console.log('✅ Iteration 2 matches Image 2 (Seed 46) perfectly!\n');
+  if (phase1.finalFractions[1].toString() !== '949/49') {
+    throw new Error(`Phase 1 Slot 2 mismatch: got ${phase1.finalFractions[1].toString()}, expected 949/49`);
+  }
+  if (phase1.finalFractions[2].toString() !== '8541/196') {
+    throw new Error(`Phase 1 Slot 3 mismatch: got ${phase1.finalFractions[2].toString()}, expected 8541/196`);
+  }
+  if (phase1.totalSum.toString() !== '6205/98') {
+    throw new Error(`Phase 1 Total mismatch: got ${phase1.totalSum.toString()}, expected 6205/98`);
+  }
+  if (phase1.extracted10DigitSum !== 55) {
+    throw new Error(`Phase 1 Seed mismatch: got ${phase1.extracted10DigitSum}, expected 55`);
+  }
+  console.log('✅ Phase 1 matches Images 1 & 2 (Base 73 ➔ Seed 55) 100% perfectly!\n');
 
-  // --- 3. ITERATION 3 (Image 3 - Visible & Interactive) ---
-  const iter3 = result.visibleIteration;
-  console.log('--- ITERATION 3 (القسم الثالث - الظاهر والتفاعلي) ---');
-  console.log(`Input: ${iter3.inputVal} (Expected: 46)`);
+  // --- 2. PHASE 2 (Image 3 - Visible & Interactive, Base 55) ---
+  const phase2 = result.visibleIteration;
+  console.log('--- PHASE 2 (القسم الثاني - الظاهر والتفاعلي) ---');
+  console.log(`Input: ${phase2.inputVal} (Expected: 55)`);
 
   const rowFractions = result.resultRows.map(r => `${r.char} (#${r.pos}): ${r.finalFractionDisplay}`);
   console.log(`Result Rows: \n  ${rowFractions.join('\n  ')}`);
-  console.log(`Expected Slots: م: 23/98, د: 593/49, د: 2961/98`);
+  console.log(`Expected Slots: م: 55/196, د: 715/49, د: 6435/196`);
 
-  if (result.resultRows[0].finalFractionDisplay !== '23/98') {
-    throw new Error(`Row 1 mismatch: got ${result.resultRows[0].finalFractionDisplay}, expected 23/98`);
+  if (result.resultRows[0].finalFractionDisplay !== '55/196') {
+    throw new Error(`Row 1 mismatch: got ${result.resultRows[0].finalFractionDisplay}, expected 55/196`);
   }
-  if (result.resultRows[1].finalFractionDisplay !== '593/49') {
-    throw new Error(`Row 2 mismatch: got ${result.resultRows[1].finalFractionDisplay}, expected 593/49`);
+  if (result.resultRows[1].finalFractionDisplay !== '715/49') {
+    throw new Error(`Row 2 mismatch: got ${result.resultRows[1].finalFractionDisplay}, expected 715/49`);
   }
-  if (
-    result.resultRows[2].finalFractionDisplay !== '423/14' &&
-    result.resultRows[2].finalFractionDisplay !== '2961/98'
-  ) {
-    throw new Error(`Row 3 mismatch: got ${result.resultRows[2].finalFractionDisplay}, expected 423/14 or 2961/98`);
+  if (result.resultRows[2].finalFractionDisplay !== '6435/196') {
+    throw new Error(`Row 3 mismatch: got ${result.resultRows[2].finalFractionDisplay}, expected 6435/196`);
   }
-  console.log('✅ All 3 Result Rows match Image 3 fractions exactly!');
+  console.log('✅ All Result Rows match Image 3 fractions (55/196, 715/49, 6435/196) exactly!');
 
-  console.log(`\nTransferred Sum: ${result.transferredSumDisplay} (Expected: 2085/49)`);
-  if (result.transferredSumDisplay !== '2085/49') {
-    throw new Error(`Transferred Sum mismatch: got ${result.transferredSumDisplay}, expected 2085/49`);
+  console.log(`\nTransferred Sum (All slots): ${result.transferredSumDisplay} (Expected: 4675/98)`);
+  if (result.transferredSumDisplay !== '4675/98') {
+    throw new Error(`Transferred Sum mismatch: got ${result.transferredSumDisplay}, expected 4675/98`);
   }
 
-  console.log(`Square Root: ${result.transferredSqrtResult.fullString.substring(0, 16)} (Expected ~ 6.5231143181...)`);
-  console.log(`10 Digits after dot: ${result.transferredSqrtResult.first10AfterDot} (Expected: 5231143181)`);
-  console.log(`Ultimate 10-Digit Sum: ${result.final10DigitSum} (Expected: 29)`);
+  console.log(`Square Root: ${result.transferredSqrtResult.fullString.substring(0, 16)} (Expected ~ 6.9068141449...)`);
+  console.log(`10 Digits after dot: ${result.transferredSqrtResult.first10AfterDot} (Expected: 9068141449)`);
+  console.log(`Ultimate 10-Digit Sum: ${result.final10DigitSum} (Expected: 46)`);
 
-  if (result.final10DigitSum !== 29) {
-    throw new Error(`Final 10-digit sum mismatch: got ${result.final10DigitSum}, expected 29`);
+  if (result.final10DigitSum !== 46) {
+    throw new Error(`Final 10-digit sum mismatch: got ${result.final10DigitSum}, expected 46`);
   }
-  console.log('✅ Ultimate 10-digit sum matches Image 3 (29) perfectly!');
+  console.log('✅ Ultimate 10-digit sum matches Image 3 (46) perfectly!');
 
   // Test interactive transfer toggles
   console.log('\n--- TESTING INTERACTIVE TRANSFER TOGGLE (زر انتقال) ---');
-  // Toggle all slots transferred
-  const allTransferred = calculateThreeIterations('مدد', [0, 1, 2]);
-  console.log(`All slots transferred:`);
-  console.log(`  New Transferred Sum: ${allTransferred.transferredSumDisplay}`);
-  console.log(`  New Sqrt: ${allTransferred.transferredSqrtResult.fullString.substring(0, 15)}...`);
-  console.log(`  New 10-digit sum: ${allTransferred.final10DigitSum}`);
+  // Toggle: only slots 0 and 1 transferred
+  const partialTransferred = calculateTwoPhases('مدد', [0, 1]);
+  console.log(`Slots 1 & 2 transferred:`);
+  console.log(`  New Transferred Sum: ${partialTransferred.transferredSumDisplay} (Expected: 2915/196)`);
+  console.log(`  New 10-digit sum: ${partialTransferred.final10DigitSum}`);
   console.log('✅ Interactive Transfer Toggle works smoothly!');
 
   console.log('\n===============================================================');
-  console.log('🎉 ALL 3-ITERATION MATHEMATICAL TESTS PASSED WITH 100% SUCCESS!');
+  console.log('🎉 ALL 2-PHASE MATHEMATICAL TESTS PASSED WITH 100% SUCCESS!');
   console.log('===============================================================');
 } catch (err) {
   console.error('❌ Verification failed:', err);
   process.exit(1);
 }
+
 

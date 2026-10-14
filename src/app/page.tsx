@@ -49,7 +49,7 @@ function HomePage() {
                 القوة العربية
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 font-bold tracking-wide truncate mt-0.5">
-                نظام الحساب الرياضي الدقيق عبر 3 دورات متتابعة
+                نظام الحساب الرياضي الدقيق عبر قسمين متتابعين (الأساس 73)
               </p>
             </div>
           </div>
@@ -94,10 +94,10 @@ function HomePage() {
                   {isCalculating ? (
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin text-white" />
-                      <span className="font-bold text-white">جاري الحساب الكسري عبر 3 دورات...</span>
+                      <span className="font-bold text-white">جاري الحساب الكسري عبر القسمين...</span>
                     </div>
                   ) : (
-                    <span>بدء الحساب الرقمي (3 دورات)</span>
+                    <span>بدء الحساب الرقمي (قسمان: مخفي وظاهر)</span>
                   )}
                 </Button>
               </CardContent>
@@ -121,7 +121,7 @@ function HomePage() {
             <div className="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/80 text-xs text-blue-950 flex items-start gap-2.5">
               <ShieldCheck className="w-4 h-4 text-blue-700 mt-0.5 flex-shrink-0" />
               <p className="leading-relaxed text-xs font-medium">
-                يعمل المحرك آلياً بحساب <strong>دورتين مخفيتين</strong> في الخلفية (أساس 260 ثم البذور المستخرجة)، ثم يعرض نتائج <strong>الدورة الثالثة الظاهرة</strong> في جدول تفاعلي منظم مع أزرار انتقال لكل حرف.
+                يعمل المحرك آلياً بحساب <strong>القسم الأول المخفي</strong> في الخلفية (أساس 73 واستخراج البذرة)، ثم يعرض نتائج <strong>القسم الثاني الظاهر</strong> في جدول تفاعلي منظم مع أزرار انتقال لكل حرف.
               </p>
             </div>
           </section>
@@ -144,7 +144,7 @@ function HomePage() {
                 <div className="text-center space-y-1.5 max-w-sm">
                   <p className="text-slate-900 text-base font-bold">بانتظار إدخال النص العربي</p>
                   <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-                    اكتب أو الصق أي كلمة أو جملة عربية في لوحة الإدخال لبدء الحساب المتتابع عبر 3 دورات واستعراض جدول الحروف وأزرار الانتقال التفاعلية.
+                    اكتب أو الصق أي كلمة أو جملة عربية في لوحة الإدخال لبدء الحساب المتتابع عبر قسمين (مخفي وظاهر) واستعراض جدول الحروف وأزرار الانتقال التفاعلية.
                   </p>
                 </div>
               </div>
@@ -158,7 +158,7 @@ function HomePage() {
             <div className="flex items-center gap-2 font-bold text-slate-800 text-center sm:text-right">
               <span>مشروع القوة العربية</span>
               <span>•</span>
-              <span>نظام الحساب الرقمي الدقيق عبر 3 دورات متتابعة</span>
+              <span>نظام الحساب الرقمي الدقيق عبر قسمين متتابعين (الأساس 73)</span>
             </div>
 
             <div className="flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-slate-200 shadow-2xs text-slate-800 font-bold">
