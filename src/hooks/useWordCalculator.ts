@@ -21,7 +21,7 @@ export interface UseWordCalculatorReturn {
 
 /**
  * Custom React Hook for 2-Phase Arabic Numerology Calculator
- * يدير تنفيذ القسمين (المخفي أساس 73، والظاهر)، والتحكم التفاعلي في أزرار الانتقال (Transfer Buttons)
+ * يدير تنفيذ القسمين (المخفي أساس 31، والظاهر)، والتحكم التفاعلي في أزرار الانتقال (Transfer Buttons)
  */
 export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
   const [text, setTextState] = useState(initialText);

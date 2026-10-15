@@ -49,7 +49,7 @@ function HomePage() {
                 القوة العربية
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 font-bold tracking-wide truncate mt-0.5">
-                نظام الحساب الرياضي الدقيق عبر قسمين متتابعين (الأساس 73)
+                نظام الحساب الرياضي الدقيق عبر قسمين متتابعين (الأساس 31)
               </p>
             </div>
           </div>
@@ -121,7 +121,7 @@ function HomePage() {
             <div className="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/80 text-xs text-blue-950 flex items-start gap-2.5">
               <ShieldCheck className="w-4 h-4 text-blue-700 mt-0.5 flex-shrink-0" />
               <p className="leading-relaxed text-xs font-medium">
-                يعمل المحرك آلياً بحساب <strong>القسم الأول المخفي</strong> في الخلفية (أساس 73 واستخراج البذرة)، ثم يعرض نتائج <strong>القسم الثاني الظاهر</strong> في جدول تفاعلي منظم مع أزرار انتقال لكل حرف.
+                يعمل المحرك آلياً بحساب <strong>القسم الأول المخفي</strong> في الخلفية (أساس 31 واستخراج البذرة)، ثم يعرض نتائج <strong>القسم الثاني الظاهر</strong> في جدول تفاعلي منظم مع أزرار انتقال لكل حرف.
               </p>
             </div>
           </section>
@@ -158,7 +158,7 @@ function HomePage() {
             <div className="flex items-center gap-2 font-bold text-slate-800 text-center sm:text-right">
               <span>مشروع القوة العربية</span>
               <span>•</span>
-              <span>نظام الحساب الرقمي الدقيق عبر قسمين متتابعين (الأساس 73)</span>
+              <span>نظام الحساب الرقمي الدقيق عبر قسمين متتابعين (الأساس 31)</span>
             </div>
 
             <div className="flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-slate-200 shadow-2xs text-slate-800 font-bold">
