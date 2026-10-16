@@ -52,7 +52,7 @@ export default function LoginForm() {
               <span className="text-blue-400 font-black">الحساب الرقمي الدقيق</span>
             </h1>
             <p className="text-slate-300 text-sm leading-relaxed max-w-sm">
-              نظام رياضي فائق الدقة لتفكيك وتحليل النصوص العربية عبر قسمين متتابعين (الأساس 31) بنظام كسري خالص.
+              نظام رياضي فائق الدقة لتفكيك وتحليل النصوص العربية عبر قسمين متتابعين (الأساس 5329) بنظام كسري خالص.
             </p>
           </div>
 
@@ -126,7 +126,7 @@ export default function LoginForm() {
           </form>
 
           <p className="text-center text-slate-500 text-xs font-bold pt-4 border-t border-slate-100">
-            مشروع القوة العربية • محرك الحساب الرقمي عبر قسمين متتابعين (الأساس 31)
+            مشروع القوة العربية • محرك الحساب الرقمي عبر قسمين متتابعين (الأساس 5329)
           </p>
         </div>
       </div>

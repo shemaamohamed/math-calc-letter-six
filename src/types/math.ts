@@ -1,7 +1,7 @@
 /**
  * Exact Fractional & Calculation Type Definitions for 2-Phase Arabic Numerology Calculator
  * تعريفات الأنواع الرياضية للحساب فائق الدقة (Arbitrary-Precision) عبر قسمين متتابعين
- * - القسم الأول (مخفي): الأساس 31 ➔ استخراج البذرة
+ * - القسم الأول (مخفي): الأساس 5329 ➔ استخراج البذرة
  * - القسم الثاني (الظاهر): الأساس البذرة المستخرجة ➔ عرض جدول الحروف والكسور مع أزرار الانتقال التفاعلية
  */
 
@@ -39,7 +39,7 @@ export interface IterationSummary {
   iterationIndex: number; // 1 (القسم الأول المخفي) or 2 (القسم الثاني الظاهر)
   name: string; // "القسم الأول (المخفي)", "القسم الثاني (الظاهر)"
   isBackground: boolean; // true for 1; false for 2
-  inputVal: number; // 31 for phase 1, seed for phase 2
+  inputVal: number; // 5329 for phase 1, seed for phase 2
   sum1: FractionType;
   sum2: FractionType;
   step2Fractions: FractionType[];

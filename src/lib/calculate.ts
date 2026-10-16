@@ -1,7 +1,7 @@
 /**
  * 2-Phase Arabic Arbitrary-Precision Numerology Calculation Engine
  * المحرك الحسابي الدقيق للغة العربية عبر قسمين متتابعين (بدون تقريب)
- * - القسم الأول (المخفي): الأساس 31 ➔ استخراج البذرة
+ * - القسم الأول (المخفي): الأساس 5329 ➔ استخراج البذرة
  * - القسم الثاني (الظاهر): الأساس البذرة المستخرجة ➔ عرض جدول الحروف والكسور مع أزرار الانتقال التفاعلية
  */
 
@@ -27,7 +27,7 @@ export type CalculationState = TwoPhaseCalculationResult;
 export type DualPhaseResult = TwoPhaseCalculationResult;
 export type FourIterationCalculationResult = TwoPhaseCalculationResult;
 
-export const BASE_VALUE = 31;
+export const BASE_VALUE = 5329;
 
 const ITERATION_NAMES = [
   'القسم الأول (المخفي)',
@@ -37,7 +37,7 @@ const ITERATION_NAMES = [
 /**
  * Execute a single phase/iteration of the 6-step Arabic fraction algorithm
  * @param chars - Normalized characters array
- * @param inputVal - The input number (31 for phase 1, previous 10-digit sum seed for phase 2)
+ * @param inputVal - The input number (5329 for phase 1, previous 10-digit sum seed for phase 2)
  * @param iterationIndex - 1 or 2
  */
 export function executeSingleIteration(
@@ -143,7 +143,7 @@ export function calculateTwoPhases(
     throw new Error('يرجى إدخال نص عربي صحيح يحتوي على حروف قابلة للتحليل');
   }
 
-  // --- القسم الأول (المخفي): الأساس 31 كقاعدة استخراجية ---
+  // --- القسم الأول (المخفي): الأساس 5329 كقاعدة استخراجية ---
   const iter1 = executeSingleIteration(normalizedChars, BASE_VALUE, 1);
 
   // --- القسم الثاني (الظاهر): الأساس البذرة المستخرجة من القسم الأول ---

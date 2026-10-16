@@ -152,7 +152,7 @@ export default function ResultView({
               </CardTitle>
             </div>
             <span className="text-xs font-bold text-slate-600 bg-white px-2.5 py-0.5 rounded-full border border-slate-200">
-              قسم أول مخفي (أساس 31) ➔ القسم الثاني الظاهر
+              قسم أول مخفي (أساس 5329) ➔ القسم الثاني الظاهر
             </span>
           </div>
         </CardHeader>
@@ -198,7 +198,7 @@ export default function ResultView({
                       {iter.inputVal}
                     </span>
                     {iter.iterationIndex === 1 && (
-                      <span className="text-[11px] text-blue-700 mr-1.5 font-bold">(القاعدة: 31)</span>
+                      <span className="text-[11px] text-blue-700 mr-1.5 font-bold">(القاعدة: 5329)</span>
                     )}
                     {iter.iterationIndex === 2 && (
                       <span className="text-[11px] text-emerald-700 mr-1.5 font-bold">(البذرة المستخرجة)</span>
