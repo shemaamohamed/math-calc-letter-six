@@ -35,11 +35,18 @@ export interface SlotData {
   isSelected: boolean;
 }
 
+export interface BaseRatio {
+  num: string | number | bigint;
+  den: string | number | bigint;
+}
+
 export interface IterationSummary {
   iterationIndex: number; // 1 (القسم الأول المخفي) or 2 (القسم الثاني الظاهر)
   name: string; // "القسم الأول (المخفي)", "القسم الثاني (الظاهر)"
   isBackground: boolean; // true for 1; false for 2
-  inputVal: number; // 5329 for phase 1, seed for phase 2
+  inputVal: number | string; // 5329 or "54/2" or seed for phase 2
+  inputDisplay?: string; // النص المعروض للمدخل (مثل "54/2" أو "5329")
+  inputFraction?: FractionType; // القيمة الكسرية الدقيقة
   sum1: FractionType;
   sum2: FractionType;
   step2Fractions: FractionType[];
@@ -68,6 +75,9 @@ export interface TwoPhaseCalculationResult {
   rawChars: string[];
   normalizedChars: string[];
   totalChars: number;
+  baseRatio?: FractionType;
+  baseRatioDisplay?: string;
+  rawBaseRatio?: { num: string; den: string };
   iterations: IterationSummary[]; // 2 phases: [Phase 1 (Hidden), Phase 2 (Visible)]
   visibleIteration: IterationSummary; // Phase 2 (Visible)
   resultRows: ResultRowItem[]; // Rows with transfer toggle for Section 2 Table

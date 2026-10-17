@@ -20,6 +20,7 @@ import {
   Table as TableIcon,
   Filter,
 } from 'lucide-react';
+import FractionRatioInput from './FractionRatioInput';
 
 interface ResultViewProps {
   result: TwoPhaseCalculationResult | null;
@@ -27,6 +28,12 @@ interface ResultViewProps {
   onSelectAll?: () => void;
   onDeselectAll?: () => void;
   onInvertSelection?: () => void;
+  baseRatio?: { num: string; den: string };
+  isCustomRatioActive?: boolean;
+  onNumeratorChange?: (num: string) => void;
+  onDenominatorChange?: (den: string) => void;
+  onToggleCustomRatio?: () => void;
+  onApplyCustomRatio?: () => void;
 }
 
 export default function ResultView({
@@ -35,6 +42,12 @@ export default function ResultView({
   onSelectAll,
   onDeselectAll,
   onInvertSelection,
+  baseRatio,
+  isCustomRatioActive = true,
+  onNumeratorChange,
+  onDenominatorChange,
+  onToggleCustomRatio,
+  onApplyCustomRatio,
 }: ResultViewProps) {
   // تصفية أسطر الجدول للعبارات الطويلة (الكل / المنتقلة / غير المنتقلة)
   const [filterMode, setFilterMode] = useState<'all' | 'transferred' | 'untransferred'>('all');
@@ -152,7 +165,7 @@ export default function ResultView({
               </CardTitle>
             </div>
             <span className="text-xs font-bold text-slate-600 bg-white px-2.5 py-0.5 rounded-full border border-slate-200">
-              قسم أول مخفي (أساس 5329) ➔ القسم الثاني الظاهر
+              قسم أول مخفي (أساس {result.baseRatioDisplay || '5329'}) ➔ القسم الثاني الظاهر
             </span>
           </div>
         </CardHeader>
@@ -160,6 +173,8 @@ export default function ResultView({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {result.iterations.map((iter, idx) => {
               const isCurrent = iter.iterationIndex === 2;
+              const isPhase1 = iter.iterationIndex === 1;
+
               return (
                 <div
                   key={idx}
@@ -169,41 +184,76 @@ export default function ResultView({
                       : 'bg-slate-50/50 border-slate-200'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span
-                      className={`text-xs font-black px-2.5 py-0.5 rounded ${
-                        isCurrent
-                          ? 'bg-blue-700 text-white'
-                          : 'bg-slate-200 text-slate-800'
-                      }`}
-                    >
-                      {iter.name}
-                    </span>
-                    {isCurrent ? (
-                      <span className="flex items-center gap-1 text-xs text-blue-800 font-bold">
-                        <Eye className="w-3.5 h-3.5" />
-                        الظاهر (التفاعلي)
+                  <div className="flex items-center justify-between mb-2.5 flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-xs font-black px-2.5 py-0.5 rounded ${
+                          isCurrent
+                            ? 'bg-blue-700 text-white'
+                            : 'bg-slate-200 text-slate-800'
+                        }`}
+                      >
+                        {iter.name}
                       </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-xs text-slate-500 font-medium">
-                        <EyeOff className="w-3.5 h-3.5" />
-                        مخفي بالخلفية
+                      {isCurrent ? (
+                        <span className="flex items-center gap-1 text-xs text-blue-800 font-bold">
+                          <Eye className="w-3.5 h-3.5" />
+                          الظاهر (التفاعلي)
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-xs text-slate-500 font-medium">
+                          <EyeOff className="w-3.5 h-3.5" />
+                          مخفي بالخلفية
+                        </span>
+                      )}
+                    </div>
+
+                    {/* المربعان (علامة الصح الخضراء والمربع الكسري الأزرق) للقسم الأول مطابقين تماماً للرسم */}
+                    {isPhase1 && (
+                      <div className="flex items-center gap-1.5" title="النسبة الكسرية القابلة للتغيير (Ratio)">
+                        <FractionRatioInput
+                          size="sm"
+                          numerator={baseRatio?.num ?? result.rawBaseRatio?.num ?? '5329'}
+                          denominator={baseRatio?.den ?? result.rawBaseRatio?.den ?? '1'}
+                          isActive={isCustomRatioActive}
+                          onNumeratorChange={onNumeratorChange || (() => {})}
+                          onDenominatorChange={onDenominatorChange || (() => {})}
+                          onToggleActive={onToggleCustomRatio}
+                          onApply={onApplyCustomRatio}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-xs text-slate-700 font-medium flex items-center justify-between flex-wrap gap-1">
+                    <div>
+                      المدخل الأساسي:{' '}
+                      <span className="font-bold font-mono text-slate-900" dir="ltr">
+                        {isPhase1
+                          ? result.baseRatioDisplay || iter.inputDisplay || iter.inputVal
+                          : iter.inputVal}
+                      </span>
+                      {isPhase1 &&
+                        result.baseRatioDisplay &&
+                        result.baseRatioDisplay.includes('/') &&
+                        iter.inputVal.toString() !== result.baseRatioDisplay && (
+                          <span className="text-[11px] text-blue-700 mr-1.5 font-bold font-mono" dir="ltr">
+                            (= {iter.inputVal})
+                          </span>
+                        )}
+                    </div>
+                    {isPhase1 && (
+                      <span className="text-[11px] text-blue-700 font-bold">
+                        (القاعدة: {result.baseRatioDisplay || '5329'})
+                      </span>
+                    )}
+                    {isCurrent && (
+                      <span className="text-[11px] text-emerald-700 font-bold">
+                        (البذرة المستخرجة)
                       </span>
                     )}
                   </div>
 
-                  <div className="text-xs text-slate-700 font-medium">
-                    المدخل الأساسي:{' '}
-                    <span className="font-bold font-mono text-slate-900" dir="ltr">
-                      {iter.inputVal}
-                    </span>
-                    {iter.iterationIndex === 1 && (
-                      <span className="text-[11px] text-blue-700 mr-1.5 font-bold">(القاعدة: 5329)</span>
-                    )}
-                    {iter.iterationIndex === 2 && (
-                      <span className="text-[11px] text-emerald-700 mr-1.5 font-bold">(البذرة المستخرجة)</span>
-                    )}
-                  </div>
                   <div className="mt-2 flex items-baseline justify-between text-xs pt-1.5 border-t border-slate-200/80">
                     <span className="text-slate-500 font-medium">مجموع 10 أرقام (البذرة):</span>
                     <span
@@ -550,7 +600,9 @@ export default function ResultView({
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
                       <span className="text-slate-500 block">المدخل الإجمالي:</span>
-                      <span className="font-mono font-bold text-slate-900" dir="ltr">{currentAuditIter.inputVal}</span>
+                      <span className="font-mono font-bold text-slate-900" dir="ltr">
+                        {currentAuditIter.inputDisplay || currentAuditIter.inputVal}
+                      </span>
                     </div>
                     <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
                       <span className="text-slate-500 block">مجموع الخطوة 2 (S2):</span>

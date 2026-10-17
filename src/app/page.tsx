@@ -3,6 +3,7 @@
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import ArabicInput from '@/components/calculator/ArabicInput';
 import ResultView from '@/components/calculator/ResultView';
+import FractionRatioInput from '@/components/calculator/FractionRatioInput';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useWordCalculator } from '@/hooks/useWordCalculator';
@@ -16,6 +17,12 @@ function HomePage() {
     result,
     error,
     isCalculating,
+    baseRatio,
+    isCustomRatioActive,
+    updateNumerator,
+    updateDenominator,
+    toggleCustomRatio,
+    applyCustomRatio,
     calculate,
     toggleSlot,
     selectAll,
@@ -28,6 +35,12 @@ function HomePage() {
     localStorage.removeItem('isAuthenticated');
     router.push('/login');
   };
+
+  const activeBaseRatioDisplay = isCustomRatioActive
+    ? baseRatio.den !== '1'
+      ? `${baseRatio.num}/${baseRatio.den}`
+      : baseRatio.num
+    : '5329';
 
   return (
     <div className="min-h-screen min-h-[100dvh] w-full bg-slate-50 text-slate-900 relative font-cairo selection:bg-blue-500/20 overflow-x-clip" dir="rtl">
@@ -49,7 +62,7 @@ function HomePage() {
                 القوة العربية
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 font-bold tracking-wide truncate mt-0.5">
-                نظام الحساب الرياضي الدقيق عبر قسمين متتابعين (الأساس 5329)
+                نظام الحساب الرياضي الدقيق عبر قسمين متتابعين (الأساس {activeBaseRatioDisplay})
               </p>
             </div>
           </div>
@@ -79,6 +92,36 @@ function HomePage() {
               </CardHeader>
               <CardContent className="p-4 sm:p-5 space-y-4 w-full min-w-0">
                 <ArabicInput value={text} onChange={val => setText(val)} />
+
+                {/* مربع النسبة الكسرية المتغير للقسم الأول (Ratio) */}
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-blue-700" />
+                      النسبة الكسرية للمدخل الأساسي (Ratio):
+                    </label>
+                    <span className="text-[11px] font-mono text-blue-800 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-200" dir="ltr">
+                      {activeBaseRatioDisplay}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-0.5">
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      كسر (بسط ومقام) أو رقم صحيح مع علامة التأشير:
+                    </p>
+
+                    <FractionRatioInput
+                      size="sm"
+                      numerator={baseRatio.num}
+                      denominator={baseRatio.den}
+                      isActive={isCustomRatioActive}
+                      onNumeratorChange={updateNumerator}
+                      onDenominatorChange={updateDenominator}
+                      onToggleActive={toggleCustomRatio}
+                      onApply={applyCustomRatio}
+                    />
+                  </div>
+                </div>
 
                 {error && (
                   <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
@@ -121,7 +164,7 @@ function HomePage() {
             <div className="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/80 text-xs text-blue-950 flex items-start gap-2.5">
               <ShieldCheck className="w-4 h-4 text-blue-700 mt-0.5 flex-shrink-0" />
               <p className="leading-relaxed text-xs font-medium">
-                يعمل المحرك آلياً بحساب <strong>القسم الأول المخفي</strong> في الخلفية (أساس 5329 واستخراج البذرة)، ثم يعرض نتائج <strong>القسم الثاني الظاهر</strong> في جدول تفاعلي منظم مع أزرار انتقال لكل حرف.
+                يعمل المحرك آلياً بحساب <strong>القسم الأول المخفي</strong> في الخلفية (أساس {activeBaseRatioDisplay} واستخراج البذرة)، ثم يعرض نتائج <strong>القسم الثاني الظاهر</strong> في جدول تفاعلي منظم مع أزرار انتقال لكل حرف.
               </p>
             </div>
           </section>
@@ -135,6 +178,12 @@ function HomePage() {
                 onSelectAll={selectAll}
                 onDeselectAll={deselectAll}
                 onInvertSelection={invertSelection}
+                baseRatio={baseRatio}
+                isCustomRatioActive={isCustomRatioActive}
+                onNumeratorChange={updateNumerator}
+                onDenominatorChange={updateDenominator}
+                onToggleCustomRatio={toggleCustomRatio}
+                onApplyCustomRatio={applyCustomRatio}
               />
             ) : (
               <div className="h-full min-h-[380px] rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 gap-3.5 group p-8 bg-white/70 w-full min-w-0">
