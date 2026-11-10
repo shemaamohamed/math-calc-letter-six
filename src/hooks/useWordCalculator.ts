@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { calculateTwoPhases } from '@/lib/calculate';
+import { calculateTwoPhases, BASE_VALUE } from '@/lib/calculate';
 import { TwoPhaseCalculationResult } from '@/types/math';
 
 export interface BaseRatioState {
@@ -38,15 +38,15 @@ export interface UseWordCalculatorReturn {
 }
 
 /**
- * Custom React Hook for 2-Phase Arabic Numerology Calculator
- * يدير تنفيذ القسمين (المخفي بالنسبة الكسرية المحددة، والظاهر)، والتحكم التفاعلي في أزرار الانتقال والنسبة
+ * Custom React Hook for Dual-Phase Dynamic Letter & Fraction Calculation Engine (V2)
+ * يدير تنفيذ القسمين (المخفي بالنسبة الأساسية المحددة، والظاهر بالبذرة والحروف المنتقلة)، والتحكم التفاعلي في أزرار الانتقال
  */
 export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
   const [text, setTextState] = useState(initialText);
   const [result, setResult] = useState<TwoPhaseCalculationResult | null>(null);
   const [transferredIndices, setTransferredIndices] = useState<number[]>([]);
   const [baseRatio, setBaseRatio] = useState<BaseRatioState>({
-    num: '5329',
+    num: BASE_VALUE.toString(),
     den: '1',
   });
   const [isCustomRatioActive, setIsCustomRatioActive] = useState<boolean>(true);
@@ -79,13 +79,13 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
       const activeRatioState = customRatio !== undefined ? customRatio : baseRatio;
       const activeState = customActive !== undefined ? customActive : isCustomRatioActive;
 
-      // إذا كانت النسبة مفعلة نستخدم الكسر المحدد، وإلا نستخدم الافتراضي (5329/1)
+      // إذا كانت النسبة مفعلة نستخدم الكسر المحدد، وإلا نستخدم الافتراضي (80/1)
       const ratioToUse = activeState
         ? {
-            num: activeRatioState.num.trim() || '5329',
+            num: activeRatioState.num.trim() || BASE_VALUE.toString(),
             den: activeRatioState.den.trim() || '1',
           }
-        : { num: '5329', den: '1' };
+        : { num: BASE_VALUE.toString(), den: '1' };
 
       // Instant execution with a micro-timeout for smooth UI state reflection
       setTimeout(() => {
@@ -99,9 +99,7 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
 
           const calcResult = calculateTwoPhases(targetText, activeIndices, ratioToUse);
           setResult(calcResult);
-          setTransferredIndices(
-            calcResult.resultRows.filter(r => r.isTransferred).map(r => r.pos - 1)
-          );
+          setTransferredIndices(calcResult.transferredIndices);
         } catch (err) {
           setError(err instanceof Error ? err.message : 'حدث خطأ في عملية الحساب');
         } finally {
@@ -151,16 +149,16 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
   const toggleSlot = useCallback(
     (index: number) => {
       if (!result) return;
-      const current = result.resultRows.filter(r => r.isTransferred).map(r => r.pos - 1);
+      const current = result.transferredIndices;
       const next = current.includes(index)
         ? current.filter(i => i !== index)
-        : [...current, index];
+        : [...current, index].sort((a, b) => a - b);
 
       setTransferredIndices(next);
       try {
         const ratioToUse = isCustomRatioActive
-          ? { num: baseRatio.num || '5329', den: baseRatio.den || '1' }
-          : { num: '5329', den: '1' };
+          ? { num: baseRatio.num || BASE_VALUE.toString(), den: baseRatio.den || '1' }
+          : { num: BASE_VALUE.toString(), den: '1' };
         const updated = calculateTwoPhases(text, next, ratioToUse);
         setResult(updated);
       } catch (err) {
@@ -176,8 +174,8 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
     setTransferredIndices(all);
     try {
       const ratioToUse = isCustomRatioActive
-        ? { num: baseRatio.num || '5329', den: baseRatio.den || '1' }
-        : { num: '5329', den: '1' };
+        ? { num: baseRatio.num || BASE_VALUE.toString(), den: baseRatio.den || '1' }
+        : { num: BASE_VALUE.toString(), den: '1' };
       const updated = calculateTwoPhases(text, all, ratioToUse);
       setResult(updated);
     } catch (err) {
@@ -190,8 +188,8 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
     setTransferredIndices([]);
     try {
       const ratioToUse = isCustomRatioActive
-        ? { num: baseRatio.num || '5329', den: baseRatio.den || '1' }
-        : { num: '5329', den: '1' };
+        ? { num: baseRatio.num || BASE_VALUE.toString(), den: baseRatio.den || '1' }
+        : { num: BASE_VALUE.toString(), den: '1' };
       const updated = calculateTwoPhases(text, [], ratioToUse);
       setResult(updated);
     } catch (err) {
@@ -201,7 +199,7 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
 
   const invertSelection = useCallback(() => {
     if (!result) return;
-    const current = result.resultRows.filter(r => r.isTransferred).map(r => r.pos - 1);
+    const current = result.transferredIndices;
     const inverted = result.resultRows
       .map((_, i) => i)
       .filter(i => !current.includes(i));
@@ -209,8 +207,8 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
     setTransferredIndices(inverted);
     try {
       const ratioToUse = isCustomRatioActive
-        ? { num: baseRatio.num || '5329', den: baseRatio.den || '1' }
-        : { num: '5329', den: '1' };
+        ? { num: baseRatio.num || BASE_VALUE.toString(), den: baseRatio.den || '1' }
+        : { num: BASE_VALUE.toString(), den: '1' };
       const updated = calculateTwoPhases(text, inverted, ratioToUse);
       setResult(updated);
     } catch (err) {
@@ -222,7 +220,7 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
     setTextState('');
     setResult(null);
     setTransferredIndices([]);
-    setBaseRatio({ num: '5329', den: '1' });
+    setBaseRatio({ num: BASE_VALUE.toString(), den: '1' });
     setIsCustomRatioActive(true);
     setError('');
   }, []);

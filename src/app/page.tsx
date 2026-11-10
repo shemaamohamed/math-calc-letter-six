@@ -121,6 +121,39 @@ function HomePage() {
                       onApply={applyCustomRatio}
                     />
                   </div>
+
+                  {/* أزرار سريعة لاختيار الأساس الشائع */}
+                  <div className="flex items-center gap-1.5 pt-1.5 border-t border-slate-200 flex-wrap">
+                    <span className="text-[10px] text-slate-500 font-bold">نماذج جاهزة:</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateNumerator('100');
+                        updateDenominator('1');
+                      }}
+                      className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-colors cursor-pointer ${
+                        baseRatio.num === '100' && baseRatio.den === '1'
+                          ? 'bg-blue-700 text-white border-blue-700 shadow-2xs'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      أساس 100 (مثال مدد)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateNumerator('80');
+                        updateDenominator('1');
+                      }}
+                      className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-colors cursor-pointer ${
+                        baseRatio.num === '80' && baseRatio.den === '1'
+                          ? 'bg-blue-700 text-white border-blue-700 shadow-2xs'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      أساس 80 (مثال جليل)
+                    </button>
+                  </div>
                 </div>
 
                 {error && (

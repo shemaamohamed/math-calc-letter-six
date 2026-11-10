@@ -18,7 +18,8 @@ import {
   Hash,
   CheckCircle2,
   Table as TableIcon,
-  Filter,
+  Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import FractionRatioInput from './FractionRatioInput';
 
@@ -59,7 +60,7 @@ export default function ResultView({
     return null;
   }
 
-  const { visibleIteration, resultRows, transferredSqrtResult } = result;
+  const { visibleIteration, hiddenIteration, resultRows, transferredSqrtResult } = result;
   const transferredCount = result.transferredCount;
   const totalCount = result.totalChars;
 
@@ -153,7 +154,7 @@ export default function ResultView({
       </div>
 
       {/* ============================================================ */}
-      {/* 2. مسار تسلسل القسمين المتتابعين (القسم الأول مخفي + القسم الثاني ظاهر) */}
+      {/* 2. مسار تسلسل القسمين المتتابعين وقنطرة توليد البذرة         */}
       {/* ============================================================ */}
       <Card className="bg-white border border-slate-200 shadow-sm overflow-hidden rounded-2xl">
         <CardHeader className="py-3 px-4 sm:px-5 bg-slate-50/70 border-b border-slate-200">
@@ -161,113 +162,125 @@ export default function ResultView({
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-blue-700" />
               <CardTitle className="text-xs sm:text-sm font-black text-slate-900">
-                مسار القسمين المتتابعين
+                تسلسل القسمين المتتابعين وقنطرة توليد البذرة
               </CardTitle>
             </div>
             <span className="text-xs font-bold text-slate-600 bg-white px-2.5 py-0.5 rounded-full border border-slate-200">
-              قسم أول مخفي (أساس {result.baseRatioDisplay || '5329'}) ➔ القسم الثاني الظاهر
+              قسم أول مخفي (أساس {result.baseRatioDisplay || '80'}) ➔ قنطرة البذرة ➔ القسم الثاني الظاهر
             </span>
           </div>
         </CardHeader>
-        <CardContent className="p-3 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {result.iterations.map((iter, idx) => {
-              const isCurrent = iter.iterationIndex === 2;
-              const isPhase1 = iter.iterationIndex === 1;
-
-              return (
-                <div
-                  key={idx}
-                  className={`p-3.5 rounded-xl border transition-all ${
-                    isCurrent
-                      ? 'bg-blue-50/50 border-blue-300 shadow-xs'
-                      : 'bg-slate-50/50 border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2.5 flex-wrap gap-2">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-xs font-black px-2.5 py-0.5 rounded ${
-                          isCurrent
-                            ? 'bg-blue-700 text-white'
-                            : 'bg-slate-200 text-slate-800'
-                        }`}
-                      >
-                        {iter.name}
-                      </span>
-                      {isCurrent ? (
-                        <span className="flex items-center gap-1 text-xs text-blue-800 font-bold">
-                          <Eye className="w-3.5 h-3.5" />
-                          الظاهر (التفاعلي)
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-xs text-slate-500 font-medium">
-                          <EyeOff className="w-3.5 h-3.5" />
-                          مخفي بالخلفية
-                        </span>
-                      )}
-                    </div>
-
-                    {/* المربعان (علامة الصح الخضراء والمربع الكسري الأزرق) للقسم الأول مطابقين تماماً للرسم */}
-                    {isPhase1 && (
-                      <div className="flex items-center gap-1.5" title="النسبة الكسرية القابلة للتغيير (Ratio)">
-                        <FractionRatioInput
-                          size="sm"
-                          numerator={baseRatio?.num ?? result.rawBaseRatio?.num ?? '5329'}
-                          denominator={baseRatio?.den ?? result.rawBaseRatio?.den ?? '1'}
-                          isActive={isCustomRatioActive}
-                          onNumeratorChange={onNumeratorChange || (() => {})}
-                          onDenominatorChange={onDenominatorChange || (() => {})}
-                          onToggleActive={onToggleCustomRatio}
-                          onApply={onApplyCustomRatio}
-                        />
-                      </div>
-                    )}
+        <CardContent className="p-3 sm:p-4 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* البطاقة 1: القسم الأول (المخفي) */}
+            <div className="p-3.5 rounded-xl border bg-slate-50/60 border-slate-200 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-black px-2.5 py-0.5 rounded bg-slate-200 text-slate-800">
+                    1. القسم الأول (المخفي)
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                    <EyeOff className="w-3 h-3" />
+                    تأسيسي بالخلفية
+                  </span>
+                </div>
+                <div className="text-xs text-slate-700 space-y-1">
+                  <div>
+                    الأساس المدخل:{' '}
+                    <span className="font-bold font-mono text-slate-900" dir="ltr">
+                      {result.baseRatioDisplay}
+                    </span>
                   </div>
-
-                  <div className="text-xs text-slate-700 font-medium flex items-center justify-between flex-wrap gap-1">
-                    <div>
-                      المدخل الأساسي:{' '}
-                      <span className="font-bold font-mono text-slate-900" dir="ltr">
-                        {isPhase1
-                          ? result.baseRatioDisplay || iter.inputDisplay || iter.inputVal
-                          : iter.inputVal}
-                      </span>
-                      {isPhase1 &&
-                        result.baseRatioDisplay &&
-                        result.baseRatioDisplay.includes('/') &&
-                        iter.inputVal.toString() !== result.baseRatioDisplay && (
-                          <span className="text-[11px] text-blue-700 mr-1.5 font-bold font-mono" dir="ltr">
-                            (= {iter.inputVal})
-                          </span>
-                        )}
-                    </div>
-                    {isPhase1 && (
-                      <span className="text-[11px] text-blue-700 font-bold">
-                        (القاعدة: {result.baseRatioDisplay || '5329'})
-                      </span>
-                    )}
-                    {isCurrent && (
-                      <span className="text-[11px] text-emerald-700 font-bold">
-                        (البذرة المستخرجة)
-                      </span>
-                    )}
+                  <div>
+                    عدد الحروف:{' '}
+                    <span className="font-bold text-slate-900">{totalCount}</span>
                   </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-slate-200 flex items-center justify-between text-xs">
+                <span className="text-slate-500">النسبة الكسرية:</span>
+                <FractionRatioInput
+                  size="sm"
+                  numerator={baseRatio?.num ?? result.rawBaseRatio?.num ?? '80'}
+                  denominator={baseRatio?.den ?? result.rawBaseRatio?.den ?? '1'}
+                  isActive={isCustomRatioActive}
+                  onNumeratorChange={onNumeratorChange || (() => {})}
+                  onDenominatorChange={onDenominatorChange || (() => {})}
+                  onToggleActive={onToggleCustomRatio}
+                  onApply={onApplyCustomRatio}
+                />
+              </div>
+            </div>
 
-                  <div className="mt-2 flex items-baseline justify-between text-xs pt-1.5 border-t border-slate-200/80">
-                    <span className="text-slate-500 font-medium">مجموع 10 أرقام (البذرة):</span>
-                    <span
-                      className={`font-mono font-black ${
-                        isCurrent ? 'text-blue-900 text-sm' : 'text-slate-900'
-                      }`}
-                      dir="ltr"
-                    >
-                      {iter.extracted10DigitSum}
+            {/* البطاقة 2: قنطرة الانتقال وتوليد البذرة */}
+            <div className="p-3.5 rounded-xl border bg-amber-50/50 border-amber-200 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-black px-2.5 py-0.5 rounded bg-amber-600 text-white flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    قنطرة توليد البذرة
+                  </span>
+                  <span className="text-[11px] text-amber-800 font-bold">
+                    {transferredCount} حروف مختارة
+                  </span>
+                </div>
+                <div className="text-xs text-slate-700 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-600">مجموع الحروف المنتقلة:</span>
+                    <span className="font-mono font-bold text-amber-950" dir="ltr">
+                      {result.transferredPhase1SumDisplay}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-600">جذر المجموع:</span>
+                    <span className="font-mono text-[11px] text-slate-800" dir="ltr">
+                      √({result.transferredPhase1SumDisplay}) = {result.transferredPhase1SqrtResult.intPart}.{result.transferredPhase1SqrtResult.first10AfterDot.substring(0, 4)}...
                     </span>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-amber-200/80 flex items-center justify-between text-xs">
+                <span className="text-amber-900 font-bold">البذرة المستخرجة:</span>
+                <span className="font-mono font-black text-amber-800 text-base" dir="ltr">
+                  {result.seedGenerated}
+                </span>
+              </div>
+            </div>
+
+            {/* البطاقة 3: القسم الثاني (الظاهر) */}
+            <div className="p-3.5 rounded-xl border bg-blue-50/60 border-blue-200 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-black px-2.5 py-0.5 rounded bg-blue-700 text-white">
+                    2. القسم الثاني (الظاهر)
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px] text-blue-800 font-bold">
+                    <Eye className="w-3 h-3" />
+                    تفاعلي بالبذرة
+                  </span>
+                </div>
+                <div className="text-xs text-slate-700 space-y-1">
+                  <div>
+                    الأساس المعتمد:{' '}
+                    <span className="font-bold font-mono text-blue-900" dir="ltr">
+                      البذرة ({result.seedGenerated})
+                    </span>
+                  </div>
+                  <div>
+                    الحروف المعالجة:{' '}
+                    <span className="font-bold text-slate-900">
+                      {result.transferredLetters.join(' - ') || 'لا يوجد'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-blue-200 flex items-center justify-between text-xs">
+                <span className="text-slate-500">الناتج الرقمي:</span>
+                <span className="font-mono font-black text-blue-900 text-base" dir="ltr">
+                  {result.final10DigitSum}
+                </span>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -288,7 +301,7 @@ export default function ResultView({
               </span>
             </div>
             <p className="text-xs text-slate-600 mt-0.5">
-              انقر على أي سطر لتبديل حالة النقل، أو استخدم أزرار التحكم السريع
+              حدد أو ألغِ الحروف عبر زر الانتقال لحساب البذرة ونقلها إلى القسم الثاني فورياً
             </p>
           </div>
 
@@ -372,15 +385,15 @@ export default function ResultView({
 
         <CardContent className="p-0">
           {/* حاوية الجدول المدمجة لمنع التمرير الزائد وتوفير رأس ثابت sticky */}
-          <div className="max-h-[360px] sm:max-h-[420px] overflow-y-auto overflow-x-hidden border-b border-slate-200">
+          <div className="max-h-[380px] sm:max-h-[440px] overflow-y-auto overflow-x-hidden border-b border-slate-200">
             <table className="w-full text-right border-collapse">
               <thead className="sticky top-0 bg-slate-100/95 backdrop-blur-sm z-10 border-b border-slate-200 text-xs font-bold text-slate-700">
                 <tr>
                   <th className="py-2.5 px-3 w-14 text-center">#</th>
                   <th className="py-2.5 px-3 w-20 text-center">الحرف</th>
-                  <th className="py-2.5 px-3 w-28 hidden sm:table-cell text-center">المدخل الأصلي</th>
-                  <th className="py-2.5 px-4 text-center">الكسر النهائي</th>
-                  <th className="py-2.5 px-4 w-32 text-center">زر الانتقال</th>
+                  <th className="py-2.5 px-3 text-center">كسر القسم الأول (المخفي)</th>
+                  <th className="py-2.5 px-4 w-36 text-center">زر الانتقال</th>
+                  <th className="py-2.5 px-4 text-center">الكسر النهائي (القسم الثاني)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -421,18 +434,13 @@ export default function ResultView({
                           </span>
                         </td>
 
-                        {/* المدخل الأصلي */}
-                        <td className="py-2.5 px-3 text-center text-slate-500 hidden sm:table-cell font-medium">
-                          {row.originalChar}
-                        </td>
-
-                        {/* الكسر النهائي */}
-                        <td className="py-2.5 px-4 text-center">
+                        {/* كسر القسم الأول المخفي */}
+                        <td className="py-2.5 px-3 text-center">
                           <span
                             dir="ltr"
-                            className="inline-block font-mono font-bold text-slate-950 bg-white px-2.5 py-1 rounded border border-slate-200 text-xs sm:text-sm shadow-2xs"
+                            className="inline-block font-mono font-bold text-slate-700 bg-slate-50 px-2 py-0.5 rounded border border-slate-200 text-xs shadow-2xs"
                           >
-                            {row.finalFractionDisplay}
+                            {row.phase1FractionDisplay || '-'}
                           </span>
                         </td>
 
@@ -461,6 +469,20 @@ export default function ResultView({
                             )}
                           </Button>
                         </td>
+
+                        {/* الكسر النهائي في القسم الثاني */}
+                        <td className="py-2.5 px-4 text-center">
+                          <span
+                            dir="ltr"
+                            className={`inline-block font-mono font-bold px-2.5 py-1 rounded text-xs sm:text-sm shadow-2xs ${
+                              isChecked
+                                ? 'text-slate-950 bg-white border border-emerald-300'
+                                : 'text-slate-400 bg-slate-50 border border-dashed border-slate-200'
+                            }`}
+                          >
+                            {row.finalFractionDisplay}
+                          </span>
+                        </td>
                       </tr>
                     );
                   })
@@ -471,11 +493,11 @@ export default function ResultView({
 
           {/* شريط الإجماليات والنتائج بعد الجدول */}
           <div className="p-4 bg-slate-50 space-y-3">
-            {/* مجموع الخانات المنتقلة */}
+            {/* مجموع الخانات المنتقلة في القسم الثاني */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-white rounded-xl border border-slate-200">
               <span className="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">
                 <Calculator className="w-4 h-4 text-blue-700" />
-                المجموع الكسري للخانات المنتقلة ({transferredCount} من {totalCount}):
+                المجموع الكسري النهائي للقسم الثاني ({transferredCount} من {totalCount} خانات):
               </span>
               <span
                 dir="ltr"
@@ -485,7 +507,7 @@ export default function ResultView({
               </span>
             </div>
 
-            {/* تفاصيل الجمع الكسري عند الرغبة */}
+            {/* تفاصيل الجمع الكسري */}
             <div className="text-[11px] text-slate-500 font-mono px-1 overflow-x-auto" dir="ltr">
               {resultRows
                 .filter(r => r.isTransferred)
@@ -560,7 +582,7 @@ export default function ResultView({
           <div className="flex items-center gap-2">
             <Calculator className="w-4 h-4 text-slate-600" />
             <span className="text-xs sm:text-sm font-bold text-slate-800">
-              عرض خطوات التدقيق الحسابي التفصيلي (الخطوات 1 إلى 6 للقسمين)
+              عرض خطوات التدقيق الحسابي التفصيلي (الخطوات 1 إلى 5 للقسمين)
             </span>
           </div>
           <div className="flex items-center gap-1 text-slate-500 text-xs font-medium">
@@ -589,56 +611,80 @@ export default function ResultView({
               ))}
             </div>
 
-            {/* تفاصيل الدورة المحددة */}
+            {/* تفاصيل القسم المحدد */}
             {(() => {
               const currentAuditIter =
                 result.iterations.find(it => it.iterationIndex === auditIterationTab) ||
                 result.iterations[0];
 
+              const isPhase2Tab = currentAuditIter.iterationIndex === 2;
+
               return (
                 <div className="space-y-3 text-xs">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                      <span className="text-slate-500 block">المدخل الإجمالي:</span>
+                      <span className="text-slate-500 block">
+                        {isPhase2Tab ? 'البذرة المستخرجة:' : 'المدخل الأساسي:'}
+                      </span>
                       <span className="font-mono font-bold text-slate-900" dir="ltr">
                         {currentAuditIter.inputDisplay || currentAuditIter.inputVal}
                       </span>
                     </div>
                     <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
                       <span className="text-slate-500 block">مجموع الخطوة 2 (S2):</span>
-                      <span className="font-mono font-bold text-slate-900" dir="ltr">{currentAuditIter.sum2.toString()}</span>
+                      <span className="font-mono font-bold text-slate-900" dir="ltr">
+                        {currentAuditIter.sum2.toString()}
+                      </span>
                     </div>
                     <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                      <span className="text-slate-500 block">مجموع الخطوة 5 (S5):</span>
-                      <span className="font-mono font-bold text-slate-900" dir="ltr">{currentAuditIter.sum5.toString()}</span>
+                      <span className="text-slate-500 block">مجموع الخطوة 5 (النسب):</span>
+                      <span className="font-mono font-bold text-slate-900" dir="ltr">
+                        {currentAuditIter.sum5.toString()}%
+                      </span>
                     </div>
                     <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
                       <span className="text-slate-500 block">مجموع الخانات (Total):</span>
-                      <span className="font-mono font-bold text-slate-900" dir="ltr">{currentAuditIter.totalSum.toString()}</span>
+                      <span className="font-mono font-bold text-slate-900" dir="ltr">
+                        {currentAuditIter.totalSum.toString()}
+                      </span>
                     </div>
                   </div>
 
-                  {/* جدول تفريغ الخطوات الست لكل حرف */}
+                  {/* جدول تفريغ الخطوات الخمس لكل حرف */}
                   <div className="overflow-x-auto rounded-lg border border-slate-200">
                     <table className="w-full text-right text-xs">
                       <thead className="bg-slate-100 font-bold text-slate-700">
                         <tr>
                           <th className="p-2 w-12 text-center">#</th>
                           <th className="p-2 w-14 text-center">الحرف</th>
-                          <th className="p-2 text-center">خطوة 2 (i²/n)</th>
-                          <th className="p-2 text-center">خطوة 3 (v2/S2×In)</th>
-                          <th className="p-2 text-center">خطوة 5 (v3/v3L×100)</th>
-                          <th className="p-2 text-center">خطوة 6 (الكسر النهائي)</th>
+                          <th className="p-2 text-center">
+                            {isPhase2Tab ? 'خطوة 2 (كسر منقول)' : 'خطوة 2 (i²/n)'}
+                          </th>
+                          <th className="p-2 text-center">خطوة 3 ((v2/S2)×الأساس)</th>
+                          <th className="p-2 text-center">خطوة 4 (جمع الحرف)</th>
+                          <th className="p-2 text-center">خطوة 5 (النسبة %)</th>
+                          <th className="p-2 text-center">الكسر النهائي</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {result.normalizedChars.map((ch, idx) => (
+                        {currentAuditIter.chars.map((ch, idx) => (
                           <tr key={idx} className="hover:bg-slate-50/50">
-                            <td className="p-2 text-center font-mono font-bold" dir="ltr">#{idx + 1}</td>
+                            <td className="p-2 text-center font-mono font-bold" dir="ltr">
+                              #{idx + 1}
+                            </td>
                             <td className="p-2 text-center font-bold text-slate-900">{ch}</td>
-                            <td className="p-2 text-center font-mono" dir="ltr">{currentAuditIter.step2Fractions[idx]?.toString() || '-'}</td>
-                            <td className="p-2 text-center font-mono" dir="ltr">{currentAuditIter.step3Fractions[idx]?.toString() || '-'}</td>
-                            <td className="p-2 text-center font-mono" dir="ltr">{currentAuditIter.step5Fractions[idx]?.toString() || '-'}</td>
+                            <td className="p-2 text-center font-mono" dir="ltr">
+                              {currentAuditIter.step2Fractions[idx]?.toString() || '-'}
+                            </td>
+                            <td className="p-2 text-center font-mono" dir="ltr">
+                              {currentAuditIter.step3Fractions[idx]?.toString() || '-'}
+                            </td>
+                            <td className="p-2 text-center font-mono" dir="ltr">
+                              {currentAuditIter.charGroups[ch]?.toString() || '-'}
+                            </td>
+                            <td className="p-2 text-center font-mono" dir="ltr">
+                              {currentAuditIter.step5Fractions[idx]?.toString() || '-'}%
+                            </td>
                             <td className="p-2 text-center font-mono font-bold text-blue-950" dir="ltr">
                               {currentAuditIter.finalFractions[idx]?.toString() || '-'}
                             </td>

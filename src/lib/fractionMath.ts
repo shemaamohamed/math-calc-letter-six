@@ -146,7 +146,13 @@ export function sqrtFractionTo10DigitSum(
     .filter(d => !isNaN(d));
 
   // Sum the 10 digits (من غير تبسيط)
-  const unsimplifiedSum = digitsList.reduce((acc, val) => acc + val, 0);
+  let unsimplifiedSum = digitsList.reduce((acc, val) => acc + val, 0);
+
+  // التحقق الدقيق للأعداد المربعة التامة (Exact Integer Check مثل جذر 49 = 7.0000000000)
+  // عندما تكون الأرقام العشرية أصفاراً ويوجد عدد صحيح موجب ناتج من الجذر
+  if (unsimplifiedSum === 0 && BigInt(intPart) > ZERO) {
+    unsimplifiedSum = Number(BigInt(intPart));
+  }
 
   // Repeated digit reduction until single digit (بالتبسيط)
   const reductionSteps: number[] = [unsimplifiedSum];
@@ -270,7 +276,13 @@ export function fractionTo10DigitSum(
     .filter(d => !isNaN(d));
 
   // Sum the 10 digits (من غير تبسيط)
-  const unsimplifiedSum = digitsList.reduce((acc, val) => acc + val, 0);
+  let unsimplifiedSum = digitsList.reduce((acc, val) => acc + val, 0);
+
+  // التحقق الدقيق للأعداد المربعة التامة (Exact Integer Check مثل جذر 49 = 7.0000000000)
+  // عندما تكون الأرقام العشرية أصفاراً ويوجد عدد صحيح موجب ناتج من الجذر
+  if (unsimplifiedSum === 0 && BigInt(intStr) > ZERO) {
+    unsimplifiedSum = Number(BigInt(intStr));
+  }
 
   // Repeated digit reduction until single digit (بالتبسيط)
   const reductionSteps: number[] = [unsimplifiedSum];
