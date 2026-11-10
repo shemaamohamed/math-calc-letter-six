@@ -1,9 +1,9 @@
 /**
  * Dual-Phase Dynamic Letter & Fraction Calculation Engine (V2)
  * المحرك الحسابي الدقيق للغة العربية فائق الدقة (Arbitrary-Precision) عبر قسمين متتابعين:
- * - القسم الأول (المخفي): الحساب التأسيسي للكلمة مع النسبة الأساسية (مثل 80 أو 100)
- * - قنطرة الانتقال وتوليد البذرة: جمع كسور الحروف المنتقلة المحددة بأزرار الانتقال، واستخراج البذرة عبر الجذر التربيعي
- * - القسم الثاني (الظاهر): يعتمد حصرياً على الحروف المنتقلة وقيمها وكسورها لحساب جدول التحليل والناتج النهائي المعتمد
+ * - القسم الأول (المخفي): الحساب التأسيسي للكلمة مع النسبة الأساسية، وجمع كسور كافة الحروف لاستخراج البذرة
+ * - القسم الثاني (الظاهر): يدمج البذرة كمدخل أساسي، ويرحل كسور القسم الأول لكافة الحروف لحساب نواتج القسم الثاني
+ * - أزرار الانتقال (Interactive Selection): تتيح للمستخدم تحديد الحروف لاشتقاق المجموع الكسري النهائي والتحقق بالجذر
  */
 
 import { Fraction, DecimalSquareRootResult, ONE, HUNDRED } from './fractionMath';
@@ -44,7 +44,7 @@ export type BaseRatioInput =
 /**
  * Execute Phase 1 (القسم المخفي) of the 5-step Arabic fraction algorithm
  * @param chars - Normalized characters array of the input word
- * @param baseInput - The base ratio/fraction (e.g. 80/1 or custom fraction)
+ * @param baseInput - The base ratio/fraction (e.g. 80/1 or 100/1)
  */
 export function executePhase1(
   chars: string[],
@@ -133,13 +133,13 @@ export function executePhase1(
     return charGroupVal.mul(v3).div(sum1);
   });
 
-  // الناتج الإجمالي للقسم الأول: جمع الخانات النهائية
+  // الناتج الإجمالي للقسم الأول: جمع الخانات النهائية لكافة الحروف
   let totalSum = new Fraction(0n, ONE);
   finalFractions.forEach(f => {
     totalSum = totalSum.add(f);
   });
 
-  // جذر المجموع واستخراج أول 10 أرقام بعد الفاصلة
+  // جذر المجموع الكلي واستخراج أول 10 أرقام بعد الفاصلة (البذرة)
   const sqrtResult = totalSum.isZero()
     ? createEmptySqrtResult()
     : totalSum.sqrtDecimal(60);
@@ -171,23 +171,23 @@ export function executePhase1(
 }
 
 /**
- * Execute Phase 2 (القسم الثاني الظاهر) based strictly on transferred letters & mapped Phase 1 fractions
- * @param selectedChars - Array of selected characters transferred to Phase 2
- * @param mappedStep2Fractions - Phase 1 final fractions for only the selected letters
- * @param seed - The integer seed derived from square root of sum of mappedStep2Fractions
- * @param originalIndices - The slot indices in the original word
- * @param selectedPhase1Sum - Sum of Phase 1 fractions for the selected letters
- * @param selectedPhase1SqrtResult - Sqrt result of selectedPhase1Sum
+ * Execute Phase 2 (القسم الثاني الظاهر) based on all letters & mapped Phase 1 fractions with derived seed
+ * @param chars - Normalized characters array of the input word
+ * @param mappedStep2Fractions - Phase 1 final fractions for all letters
+ * @param seed - The integer seed derived from square root of total Phase 1 sum
+ * @param originalIndices - Slot indices
+ * @param phase1TotalSum - Total sum fraction of Phase 1
+ * @param phase1SqrtResult - Sqrt result of Phase 1 total sum
  */
 export function executePhase2(
-  selectedChars: string[],
+  chars: string[],
   mappedStep2Fractions: Fraction[],
   seed: number,
   originalIndices: number[],
-  selectedPhase1Sum: Fraction,
-  selectedPhase1SqrtResult: DecimalSquareRootResult
+  phase1TotalSum: Fraction,
+  phase1SqrtResult: DecimalSquareRootResult
 ): IterationSummary {
-  const m = selectedChars.length;
+  const m = chars.length;
 
   if (m === 0) {
     const emptyFrac = new Fraction(0n, ONE);
@@ -222,7 +222,7 @@ export function executePhase2(
   const seedFrac = new Fraction(BigInt(seed), ONE);
   const inputDisplay = seed.toString();
 
-  // 2. الخطوة 2 للقسم الثاني: ترحيل الكسور النهائية للحروف المختارة من القسم الأول
+  // 2. الخطوة 2 للقسم الثاني: ترحيل الكسور النهائية للحروف من القسم الأول
   const step2Fractions = mappedStep2Fractions;
   let sum2 = new Fraction(0n, ONE);
   step2Fractions.forEach(f => {
@@ -235,9 +235,9 @@ export function executePhase2(
     return v2.div(sum2).mul(seedFrac);
   });
 
-  // 4. الخطوة 4: جمع الحروف المتماثلة في نواتج خطوة 3 للحروف المنتقلة
+  // 4. الخطوة 4: جمع الحروف المتماثلة في نواتج خطوة 3
   const charGroups: Record<string, Fraction> = {};
-  selectedChars.forEach((c, idx) => {
+  chars.forEach((c, idx) => {
     const v3 = step3Fractions[idx];
     charGroups[c] = charGroups[c] ? charGroups[c].add(v3) : v3;
   });
@@ -254,7 +254,7 @@ export function executePhase2(
 
   const step6RatioFractions = step5Fractions;
 
-  const finalFractions = selectedChars.map((c, idx) => {
+  const finalFractions = chars.map((c, idx) => {
     const charGroupVal = charGroups[c];
     const v3 = step3Fractions[idx];
     if (seedFrac.isZero()) return new Fraction(0n, ONE);
@@ -281,7 +281,7 @@ export function executePhase2(
     inputVal: seed,
     inputDisplay,
     inputFraction: seedFrac,
-    chars: selectedChars,
+    chars,
     originalIndices,
     sum1: seedFrac,
     sum2,
@@ -295,8 +295,8 @@ export function executePhase2(
     totalSum,
     sqrtResult,
     extracted10DigitSum,
-    selectedPhase1Sum,
-    selectedPhase1SqrtResult,
+    selectedPhase1Sum: phase1TotalSum,
+    selectedPhase1SqrtResult: phase1SqrtResult,
   };
 }
 
@@ -316,7 +316,7 @@ function createEmptySqrtResult(): DecimalSquareRootResult {
 /**
  * Execute the Full 2-Phase Calculation Engine for Arabic Text
  * @param text - The input Arabic text
- * @param transferredIndices - Indices of slots transferred in Phase 2 via transition buttons
+ * @param transferredIndices - Indices of slots checked/selected in Phase 2 via transition buttons
  * @param customBaseRatio - Optional custom ratio/fraction for Phase 1 (default: BASE_VALUE 80)
  */
 export function calculateTwoPhases(
@@ -372,74 +372,48 @@ export function calculateTwoPhases(
     baseFraction = new Fraction(BigInt(BASE_VALUE), ONE);
   }
 
-  // --- المرحلة 1: تنفيذ القسم الأول (المخفي) ---
+  // --- المرحلة 1: تنفيذ القسم الأول (المخفي) لكافة حروف الكلمة ---
   const iter1 = executePhase1(normalizedChars, baseFraction);
 
-  // --- المرحلة 2: تحديد الحروف المنتقلة وقنطرة توليد البذرة ---
-  // افتراضياً: يتم نقل كافة الحروف ما لم يحدد المستخدم خلاف ذلك
+  // استخراج البذرة المعتمدة من مجموع كافة كسور القسم الأول
+  const seedGenerated = iter1.extracted10DigitSum;
+  const phase1TotalSum =
+    iter1.totalSum instanceof Fraction
+      ? iter1.totalSum
+      : new Fraction(iter1.totalSum.num, iter1.totalSum.den);
+  const seedSqrtResult = iter1.sqrtResult;
+
+  // --- المرحلة 2: تنفيذ القسم الثاني (الظاهر) بكافة حروف الكلمة والبذرة المستخرجة ---
+  const allP1Fractions = iter1.finalFractions.map(f =>
+    f instanceof Fraction ? f : new Fraction(f.num, f.den)
+  );
+
+  const iter2 = executePhase2(
+    normalizedChars,
+    allP1Fractions,
+    seedGenerated,
+    normalizedChars.map((_, i) => i),
+    phase1TotalSum,
+    seedSqrtResult
+  );
+
+  // --- المرحلة 3: التحديد التفاعلي (أزرار الانتقال) واشتقاق الناتج النهائي المعتمد ---
+  // افتراضياً: كافة الحروف محددة ما لم يحدد المستخدم خلاف ذلك
   const activeSelected =
     transferredIndices !== undefined
       ? transferredIndices.filter(i => i >= 0 && i < n)
       : normalizedChars.map((_, i) => i);
 
-  // استخراج الحروف والكسور المنتقلة فقط
-  const selectedChars: string[] = [];
-  const selectedMappedFractions: Fraction[] = [];
-  let transferredPhase1Sum = new Fraction(0n, ONE);
-
-  activeSelected.forEach(idx => {
-    selectedChars.push(normalizedChars[idx]);
-    const rawFrac = iter1.finalFractions[idx];
-    const frac = rawFrac instanceof Fraction ? rawFrac : new Fraction(rawFrac.num, rawFrac.den);
-    selectedMappedFractions.push(frac);
-    transferredPhase1Sum = transferredPhase1Sum.add(frac);
-  });
-
-  // توليد البذرة للقسم الثاني عبر الجذر التربيعي لمجموع كسور الحروف المنتقلة
-  let seedSqrtResult: DecimalSquareRootResult;
-  let seedGenerated: number;
-
-  if (activeSelected.length === 0 || transferredPhase1Sum.isZero()) {
-    seedSqrtResult = createEmptySqrtResult();
-    seedGenerated = 0;
-  } else {
-    seedSqrtResult = transferredPhase1Sum.sqrtDecimal(60);
-    seedGenerated = seedSqrtResult.unsimplifiedSum > 0 ? seedSqrtResult.unsimplifiedSum : 1;
-  }
-
-  // --- المرحلة 3: تنفيذ القسم الثاني (الظاهر) بالحروف المنتقلة والبذرة المولدة ---
-  const iter2 = executePhase2(
-    selectedChars,
-    selectedMappedFractions,
-    seedGenerated,
-    activeSelected,
-    transferredPhase1Sum,
-    seedSqrtResult
-  );
-
-  // بناء أسطر الجدول الكاملة لكافة حروف الكلمة الأصلية
-  // الخانات المنتقلة تأخذ كسرها النهائي المحسوب في القسم الثاني
-  // الخانات غير المنتقلة تظهر بدون كسر القسم الثاني
+  // بناء أسطر الجدول الكاملة لكافة حروف الكلمة
   const resultRows: ResultRowItem[] = normalizedChars.map((char, idx) => {
     const isTransferred = activeSelected.includes(idx);
     const p1Frac = iter1.finalFractions[idx];
-    
-    let finalFrac: Fraction;
-    let finalFracDisplay: string;
+    const p2Frac = iter2.finalFractions[idx] || new Fraction(0n, ONE);
 
-    if (isTransferred) {
-      const posInSelected = activeSelected.indexOf(idx);
-      const rawFinal = iter2.finalFractions[posInSelected];
-      finalFrac = rawFinal
-        ? (rawFinal instanceof Fraction ? rawFinal : new Fraction(rawFinal.num, rawFinal.den))
-        : new Fraction(0n, ONE);
-      finalFracDisplay = finalFrac.toString();
-    } else {
-      finalFrac = new Fraction(0n, ONE);
-      finalFracDisplay = '-';
-    }
-
-    const p1Display = p1Frac instanceof Fraction ? p1Frac.toString() : `${p1Frac.num}/${p1Frac.den}`;
+    const p1Display =
+      p1Frac instanceof Fraction ? p1Frac.toString() : `${p1Frac.num}/${p1Frac.den}`;
+    const p2Display =
+      p2Frac instanceof Fraction ? p2Frac.toString() : `${p2Frac.num}/${p2Frac.den}`;
 
     return {
       pos: idx + 1,
@@ -447,13 +421,29 @@ export function calculateTwoPhases(
       originalChar: rawChars[idx] || char,
       phase1Fraction: p1Frac,
       phase1FractionDisplay: p1Display,
-      finalFraction: finalFrac,
-      finalFractionDisplay: finalFracDisplay,
+      finalFraction: p2Frac,
+      finalFractionDisplay: p2Display,
       isTransferred,
     };
   });
 
-  const transferredSqrtResult = iter2.sqrtResult;
+  // جمع كسور الخانات المحددة فقط من القسم الثاني
+  let transferredSum = new Fraction(0n, ONE);
+  activeSelected.forEach(idx => {
+    const rawF = iter2.finalFractions[idx];
+    const f = rawF instanceof Fraction ? rawF : new Fraction(rawF.num, rawF.den);
+    transferredSum = transferredSum.add(f);
+  });
+
+  // الجذر التربيعي لمجموع الخانات المحددة والتحقق النهائي
+  let transferredSqrtResult: DecimalSquareRootResult;
+  if (activeSelected.length === 0 || transferredSum.isZero()) {
+    transferredSqrtResult = createEmptySqrtResult();
+  } else {
+    transferredSqrtResult = transferredSum.sqrtDecimal(60);
+  }
+
+  const selectedChars = activeSelected.map(idx => normalizedChars[idx]);
 
   return {
     inputText: text,
@@ -469,13 +459,13 @@ export function calculateTwoPhases(
     transferredCount: activeSelected.length,
     transferredIndices: activeSelected,
     transferredLetters: selectedChars,
-    transferredPhase1SumFraction: transferredPhase1Sum,
-    transferredPhase1SumDisplay: transferredPhase1Sum.toString(),
+    transferredPhase1SumFraction: phase1TotalSum,
+    transferredPhase1SumDisplay: phase1TotalSum.toString(),
     transferredPhase1SqrtResult: seedSqrtResult,
     seedGenerated,
     resultRows,
-    transferredSumFraction: iter2.totalSum,
-    transferredSumDisplay: iter2.totalSum.toString(),
+    transferredSumFraction: transferredSum,
+    transferredSumDisplay: transferredSum.toString(),
     transferredSqrtResult,
     final10DigitSum: transferredSqrtResult.unsimplifiedSum,
     finalSingleDigit: transferredSqrtResult.simplifiedSingleDigit,

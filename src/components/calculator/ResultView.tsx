@@ -221,12 +221,12 @@ export default function ResultView({
                     قنطرة توليد البذرة
                   </span>
                   <span className="text-[11px] text-amber-800 font-bold">
-                    {transferredCount} حروف مختارة
+                    مجموع القسم الأول
                   </span>
                 </div>
                 <div className="text-xs text-slate-700 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600">مجموع الحروف المنتقلة:</span>
+                    <span className="text-slate-600">مجموع كسور القسم 1:</span>
                     <span className="font-mono font-bold text-amber-950" dir="ltr">
                       {result.transferredPhase1SumDisplay}
                     </span>
