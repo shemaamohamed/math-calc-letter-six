@@ -1,8 +1,9 @@
 /**
- * Exact Fractional & Calculation Type Definitions for Dual-Phase Dynamic Letter & Fraction Calculation Engine (V2)
- * تعريفات الأنواع الرياضية للحساب فائق الدقة (Arbitrary-Precision) عبر قسمين متتابعين
- * - القسم الأول (المخفي): الحساب التأسيسي للكلمة مع النسبة الأساسية (مثل 80 أو 100)
- * - القسم الثاني (الظاهر): يعتمد حصرياً على الحروف المنتقلة المحددة بأزرار الانتقال لاستخراج البذرة وبناء الحساب
+ * Exact Fractional & Calculation Type Definitions for Multi-Section Dynamic Letter & Fraction Engine
+ * تعريفات الأنواع الرياضية للحساب فائق الدقة (Arbitrary-Precision) مع دعم الأقسام اللانهائية
+ * - كل قسم يتكون من: 1) الخطوات المعتادة، 2) زر انتقال الخانات، 3) زر إضافة قسم
+ * - يُعرض الحساب والتوضيح للقسم الحالي فقط
+ * - ترحيل ناتج القسم السابق كقيمة ابتدائية للقسم الجديد
  */
 
 export interface FractionType {
@@ -21,6 +22,125 @@ export interface DecimalSquareRootResult {
   simplifiedSingleDigit: number; // الرقم المفرد النهائي
 }
 
+export interface BaseRatio {
+  num: string | number | bigint;
+  den: string | number | bigint;
+}
+
+export interface SectionRowItem {
+  pos: number;
+  char: string;
+  originalChar: string;
+  step2Fraction: FractionType;
+  step2FractionDisplay: string;
+  step3Fraction: FractionType;
+  step3FractionDisplay: string;
+  step4GroupFraction: FractionType;
+  step4GroupFractionDisplay: string;
+  step5PercentageFraction: FractionType;
+  step5PercentageDisplay: string;
+  finalFraction: FractionType;
+  finalFractionDisplay: string;
+  isSelected: boolean;
+}
+
+export interface SectionData {
+  sectionIndex: number; // 1, 2, 3, 4, ...
+  name: string; // "القسم 1", "القسم 2", ...
+  inputVal: number | string;
+  inputDisplay: string;
+  inputFraction: FractionType;
+  chars: string[];
+  
+  // 🔵 الخطوات المعتادة (1 إلى 5)
+  sum1: FractionType; // القيمة الابتدائية للقسم
+  sum2: FractionType; // مجموع الخطوة 2
+  step2Fractions: FractionType[]; // قيم الخطوة 2
+  step3Fractions: FractionType[]; // قيم الخطوة 3
+  charGroups: Record<string, FractionType>; // جمع الحروف المتماثلة في الخطوة 4
+  step5PercentageFractions: FractionType[]; // نسب الخطوة 5
+  step5Fractions: FractionType[]; // الكسور النهائية لكل خانة في الخطوة 5
+  totalSum: FractionType; // مجموع كافة الخانات
+  
+  // 🔵 زر انتقال الخانات (التحديد الديناميكي للقسم الحالي)
+  rows: SectionRowItem[];
+  selectedIndices: number[];
+  selectedCount: number;
+  selectedSumFraction: FractionType;
+  selectedSumDisplay: string;
+  selectedSqrtResult: DecimalSquareRootResult;
+  sectionResult: number; // ناتج جمع أول 10 أرقام (قيمة القسم الحالية المعتمدة)
+  simplifiedSingleDigit: number;
+  reductionSteps: number[];
+  
+  // Backwards compatibility fields for IterationSummary
+  isBackground?: boolean;
+  step6RatioFractions?: FractionType[];
+  finalFractions?: FractionType[];
+  sqrtResult?: DecimalSquareRootResult;
+  extracted10DigitSum?: number;
+  sum5?: FractionType;
+  iterationIndex?: number;
+}
+
+export interface MultiSectionCalculationResult {
+  inputText: string;
+  rawChars: string[];
+  normalizedChars: string[];
+  totalChars: number;
+  baseRatio?: FractionType;
+  baseRatioDisplay?: string;
+  rawBaseRatio?: { num: string; den: string };
+  
+  // بيانات الأقسام المتتابعة
+  sections: SectionData[];
+  currentSectionIndex: number; // رقم القسم النشط حالياً المعروض (1, 2, 3, ...)
+  currentSection: SectionData; // كائن القسم الحالي فقط المعروض
+  totalSectionsCount: number; // إجمالي الأقسام المُنشأة
+  
+  // الجواب النهائي المعتمد للقسم الحالي
+  finalAnswer: number;
+  finalAnswerSingleDigit: number;
+  reductionSteps: number[];
+
+  // Aliases for backwards compatibility with previous components
+  iterations: SectionData[];
+  visibleIteration: SectionData;
+  hiddenIteration?: SectionData;
+  resultRows: ResultRowItem[];
+  transferredCount: number;
+  transferredIndices: number[];
+  transferredLetters: string[];
+  transferredSumFraction: FractionType;
+  transferredSumDisplay: string;
+  transferredSqrtResult: DecimalSquareRootResult;
+  final10DigitSum: number;
+  finalSingleDigit: number;
+  seedGenerated: number;
+  transferredPhase1SumFraction: FractionType;
+  transferredPhase1SumDisplay: string;
+  transferredPhase1SqrtResult: DecimalSquareRootResult;
+}
+
+// Backwards compatibility types
+export type IterationSummary = SectionData;
+export interface ResultRowItem {
+  pos: number;
+  char: string;
+  originalChar: string;
+  phase1Fraction?: FractionType;
+  phase1FractionDisplay?: string;
+  finalFraction: FractionType;
+  finalFractionDisplay: string;
+  isTransferred: boolean;
+}
+
+export type TwoPhaseCalculationResult = MultiSectionCalculationResult;
+export type ThreeIterationCalculationResult = MultiSectionCalculationResult;
+export type FourIterationCalculationResult = MultiSectionCalculationResult;
+export type DualPhaseResult = MultiSectionCalculationResult;
+export type CalculationState = MultiSectionCalculationResult;
+
 export interface SlotData {
   pos: number;
   char: string;
@@ -34,88 +154,3 @@ export interface SlotData {
   finalValueFrac: FractionType;
   isSelected: boolean;
 }
-
-export interface BaseRatio {
-  num: string | number | bigint;
-  den: string | number | bigint;
-}
-
-export interface IterationSummary {
-  iterationIndex: number; // 1 (القسم الأول المخفي) or 2 (القسم الثاني الظاهر)
-  name: string; // "القسم الأول (المخفي)", "القسم الثاني (الظاهر)"
-  isBackground: boolean; // true for 1; false for 2
-  inputVal: number | string; // 80 or custom ratio for phase 1; seed for phase 2
-  inputDisplay?: string; // النص المعروض للمدخل (مثل "80" أو "54/2")
-  inputFraction?: FractionType; // القيمة الكسرية الدقيقة للمدخل/البذرة
-  
-  // الحروف النشطة في هذا القسم ومواقعها
-  chars: string[];
-  originalIndices?: number[]; // الفهارس في الكلمة الأصلية
-  
-  sum1: FractionType; // المدخل الإجمالي (الأساس أو البذرة)
-  sum2: FractionType; // مجموع الخطوة 2
-  step2Fractions: FractionType[]; // قيم الخطوة 2
-  step3Fractions: FractionType[]; // قيم الخطوة 3
-  charGroups: Record<string, FractionType>; // جمع الحروف المتماثلة في الخطوة 4
-  step5Fractions: FractionType[]; // نسب الخطوة 5 (Step 3 ÷ Base × 100)
-  sum5: FractionType; // مجموع الخطوة 5 (عادة 100%)
-  step6RatioFractions: FractionType[]; // مصفوفة النسب المئوية
-  finalFractions: FractionType[]; // الكسور النهائية لكل خانة
-  totalSum: FractionType; // مجموع الخانات النهائية
-  sqrtResult: DecimalSquareRootResult; // جذر المجموع
-  extracted10DigitSum: number; // ناتج جمع أول 10 أرقام بعد الفاصلة
-  
-  // معلومات قنطرة الانتقال (مجموع وجذر الحروف المنتقلة من القسم الأول لتوليد بذرة القسم الثاني)
-  selectedPhase1Sum?: FractionType; // مجموع كسور الحروف المنتقلة (مثل 1924/45)
-  selectedPhase1SqrtResult?: DecimalSquareRootResult; // جذر مجموع الحروف المنتقلة (مثل 6.5387... -> 48)
-}
-
-export interface ResultRowItem {
-  pos: number;
-  char: string;
-  originalChar: string;
-  phase1Fraction?: FractionType; // الكسر النهائي المقابل من القسم الأول
-  phase1FractionDisplay?: string;
-  finalFraction: FractionType; // الكسر النهائي في القسم الثاني (أو صفر إذا لم تنقل)
-  finalFractionDisplay: string;
-  isTransferred: boolean; // هل تم نقل الحرف عبر زر الانتقال؟
-}
-
-export interface TwoPhaseCalculationResult {
-  inputText: string;
-  rawChars: string[];
-  normalizedChars: string[];
-  totalChars: number;
-  baseRatio?: FractionType;
-  baseRatioDisplay?: string;
-  rawBaseRatio?: { num: string; den: string };
-  iterations: IterationSummary[]; // [Phase 1 (Hidden), Phase 2 (Visible)]
-  visibleIteration: IterationSummary; // Phase 2 (Visible)
-  hiddenIteration: IterationSummary; // Phase 1 (Hidden)
-  
-  // بيانات قنطرة الانتقال وتوليد البذرة (Seed Generation Bridge)
-  transferredCount: number;
-  transferredIndices: number[];
-  transferredLetters: string[];
-  transferredPhase1SumFraction: FractionType; // مجموع كسور الحروف المنتقلة (مثل 1924/45)
-  transferredPhase1SumDisplay: string;
-  transferredPhase1SqrtResult: DecimalSquareRootResult; // جذر المجموع واستخراج البذرة
-  seedGenerated: number; // البذرة المولدة للقسم الثاني (مثل 48)
-  
-  // أسطر الجدول التفاعلي في القسم الثاني
-  resultRows: ResultRowItem[];
-  
-  // الناتج النهائي للقسم الثاني
-  transferredSumFraction: FractionType; // مجموع أسطر القسم الثاني (مثل 7994928/231361)
-  transferredSumDisplay: string;
-  transferredSqrtResult: DecimalSquareRootResult; // جذر الناتج النهائي
-  final10DigitSum: number; // مجموع أول 10 أرقام بعد الفاصلة (مثل 40)
-  finalSingleDigit: number; // الرقم المفرد النهائي (مثل 4)
-  reductionSteps: number[]; // خطوات الاختزال
-}
-
-// Aliases for backwards compatibility
-export type ThreeIterationCalculationResult = TwoPhaseCalculationResult;
-export type FourIterationCalculationResult = TwoPhaseCalculationResult;
-export type DualPhaseResult = TwoPhaseCalculationResult;
-export type CalculationState = TwoPhaseCalculationResult;

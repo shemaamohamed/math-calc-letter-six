@@ -28,6 +28,11 @@ function HomePage() {
     selectAll,
     deselectAll,
     invertSelection,
+    totalSectionsCount,
+    activeSectionIndex,
+    addSection,
+    removeLastSection,
+    setActiveSection,
   } = useWordCalculator('');
   const router = useRouter();
 
@@ -217,6 +222,9 @@ function HomePage() {
                 onDenominatorChange={updateDenominator}
                 onToggleCustomRatio={toggleCustomRatio}
                 onApplyCustomRatio={applyCustomRatio}
+                onAddSection={addSection}
+                onRemoveLastSection={removeLastSection}
+                onSelectSection={setActiveSection}
               />
             ) : (
               <div className="h-full min-h-[380px] rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 gap-3.5 group p-8 bg-white/70 w-full min-w-0">
@@ -226,7 +234,7 @@ function HomePage() {
                 <div className="text-center space-y-1.5 max-w-sm">
                   <p className="text-slate-900 text-base font-bold">بانتظار إدخال النص العربي</p>
                   <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-                    اكتب أو الصق أي كلمة أو جملة عربية في لوحة الإدخال لبدء الحساب المتتابع عبر قسمين (مخفي وظاهر) واستعراض جدول الحروف وأزرار الانتقال التفاعلية.
+                    اكتب أو الصق أي حرف أو كلمة أو جملة أو مقال كامل لبدء الحساب المتتابع عبر الأقسام واستعراض خطوات القسم الحالي وأزرار الانتقال وزر إضافة قسم.
                   </p>
                 </div>
               </div>

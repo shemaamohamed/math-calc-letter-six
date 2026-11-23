@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { calculateTwoPhases, BASE_VALUE } from '@/lib/calculate';
-import { TwoPhaseCalculationResult } from '@/types/math';
+import { calculateMultiSection, BASE_VALUE } from '@/lib/calculate';
+import { MultiSectionCalculationResult, TwoPhaseCalculationResult } from '@/types/math';
 
 export interface BaseRatioState {
   num: string;
@@ -12,7 +12,7 @@ export interface BaseRatioState {
 export interface UseWordCalculatorReturn {
   text: string;
   setText: (val: string) => void;
-  result: TwoPhaseCalculationResult | null;
+  result: MultiSectionCalculationResult | null;
   error: string;
   isCalculating: boolean;
   transferredIndices: number[];
@@ -26,25 +26,37 @@ export interface UseWordCalculatorReturn {
   applyCustomRatio: () => void;
   calculate: (
     customText?: string,
-    customIndices?: number[],
+    customSectionsSelected?: number[][],
     customRatio?: BaseRatioState,
-    customActive?: boolean
+    customActive?: boolean,
+    customSectionsCount?: number,
+    customActiveIndex?: number
   ) => void;
   toggleSlot: (index: number) => void;
   selectAll: () => void;
   deselectAll: () => void;
   invertSelection: () => void;
   reset: () => void;
+  
+  // 🔵 إدارة الأقسام المتتابعة (زر إضافة قسم والتنقل)
+  totalSectionsCount: number;
+  activeSectionIndex: number;
+  addSection: () => void;
+  removeLastSection: () => void;
+  setActiveSection: (index: number) => void;
 }
 
 /**
- * Custom React Hook for Dual-Phase Dynamic Letter & Fraction Calculation Engine (V2)
- * يدير تنفيذ القسمين (المخفي بالنسبة الأساسية المحددة، والظاهر بالبذرة والحروف المنتقلة)، والتحكم التفاعلي في أزرار الانتقال
+ * Custom React Hook for Multi-Section Dynamic Letter & Fraction Calculation Engine
+ * يدير الحساب المتتابع عبر الأقسام اللانهائية مع عرض القسم الحالي فقط
  */
 export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
   const [text, setTextState] = useState(initialText);
-  const [result, setResult] = useState<TwoPhaseCalculationResult | null>(null);
-  const [transferredIndices, setTransferredIndices] = useState<number[]>([]);
+  const [result, setResult] = useState<MultiSectionCalculationResult | null>(null);
+  const [totalSectionsCount, setTotalSectionsCount] = useState<number>(1);
+  const [activeSectionIndex, setActiveSectionIndex] = useState<number>(1);
+  const [sectionsSelections, setSectionsSelections] = useState<number[][]>([]);
+  
   const [baseRatio, setBaseRatio] = useState<BaseRatioState>({
     num: BASE_VALUE.toString(),
     den: '1',
@@ -56,15 +68,19 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
   const setText = useCallback((newText: string) => {
     setTextState(newText);
     setError('');
-    setTransferredIndices([]);
+    setSectionsSelections([]);
+    setTotalSectionsCount(1);
+    setActiveSectionIndex(1);
   }, []);
 
   const calculate = useCallback(
     (
       customText?: string,
-      customIndices?: number[],
+      customSectionsSelected?: number[][],
       customRatio?: BaseRatioState,
-      customActive?: boolean
+      customActive?: boolean,
+      customSectionsCount?: number,
+      customActiveIndex?: number
     ) => {
       const targetText = customText !== undefined ? customText : text;
       setError('');
@@ -78,6 +94,9 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
 
       const activeRatioState = customRatio !== undefined ? customRatio : baseRatio;
       const activeState = customActive !== undefined ? customActive : isCustomRatioActive;
+      const sectionsCount = customSectionsCount !== undefined ? customSectionsCount : totalSectionsCount;
+      const targetActiveIndex = customActiveIndex !== undefined ? customActiveIndex : activeSectionIndex;
+      const selectionsToUse = customSectionsSelected !== undefined ? customSectionsSelected : sectionsSelections;
 
       // إذا كانت النسبة مفعلة نستخدم الكسر المحدد، وإلا نستخدم الافتراضي (80/1)
       const ratioToUse = activeState
@@ -87,19 +106,22 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
           }
         : { num: BASE_VALUE.toString(), den: '1' };
 
-      // Instant execution with a micro-timeout for smooth UI state reflection
       setTimeout(() => {
         try {
-          const activeIndices =
-            customIndices !== undefined
-              ? customIndices
-              : transferredIndices.length > 0
-              ? transferredIndices
-              : undefined;
-
-          const calcResult = calculateTwoPhases(targetText, activeIndices, ratioToUse);
+          const calcResult = calculateMultiSection(
+            targetText,
+            ratioToUse,
+            selectionsToUse,
+            sectionsCount,
+            targetActiveIndex
+          );
           setResult(calcResult);
-          setTransferredIndices(calcResult.transferredIndices);
+          setTotalSectionsCount(calcResult.totalSectionsCount);
+          setActiveSectionIndex(calcResult.currentSectionIndex);
+
+          // مزامنة التحديدات لكل قسم
+          const updatedSelections = calcResult.sections.map(s => s.selectedIndices);
+          setSectionsSelections(updatedSelections);
         } catch (err) {
           setError(err instanceof Error ? err.message : 'حدث خطأ في عملية الحساب');
         } finally {
@@ -107,7 +129,7 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
         }
       }, 50);
     },
-    [text, transferredIndices, baseRatio, isCustomRatioActive]
+    [text, sectionsSelections, baseRatio, isCustomRatioActive, totalSectionsCount, activeSectionIndex]
   );
 
   const updateNumerator = useCallback(
@@ -115,10 +137,10 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
       const newRatio = { ...baseRatio, num };
       setBaseRatio(newRatio);
       if (text.trim() && result) {
-        calculate(text, transferredIndices, newRatio, isCustomRatioActive);
+        calculate(text, sectionsSelections, newRatio, isCustomRatioActive, totalSectionsCount, activeSectionIndex);
       }
     },
-    [baseRatio, text, result, transferredIndices, isCustomRatioActive, calculate]
+    [baseRatio, text, result, sectionsSelections, isCustomRatioActive, totalSectionsCount, activeSectionIndex, calculate]
   );
 
   const updateDenominator = useCallback(
@@ -126,104 +148,198 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
       const newRatio = { ...baseRatio, den };
       setBaseRatio(newRatio);
       if (text.trim() && result) {
-        calculate(text, transferredIndices, newRatio, isCustomRatioActive);
+        calculate(text, sectionsSelections, newRatio, isCustomRatioActive, totalSectionsCount, activeSectionIndex);
       }
     },
-    [baseRatio, text, result, transferredIndices, isCustomRatioActive, calculate]
+    [baseRatio, text, result, sectionsSelections, isCustomRatioActive, totalSectionsCount, activeSectionIndex, calculate]
   );
 
   const toggleCustomRatio = useCallback(() => {
     const nextActive = !isCustomRatioActive;
     setIsCustomRatioActive(nextActive);
     if (text.trim() && result) {
-      calculate(text, transferredIndices, baseRatio, nextActive);
+      calculate(text, sectionsSelections, baseRatio, nextActive, totalSectionsCount, activeSectionIndex);
     }
-  }, [isCustomRatioActive, text, result, transferredIndices, baseRatio, calculate]);
+  }, [isCustomRatioActive, text, result, sectionsSelections, baseRatio, totalSectionsCount, activeSectionIndex, calculate]);
 
   const applyCustomRatio = useCallback(() => {
     if (text.trim()) {
-      calculate(text, transferredIndices, baseRatio, isCustomRatioActive);
+      calculate(text, sectionsSelections, baseRatio, isCustomRatioActive, totalSectionsCount, activeSectionIndex);
     }
-  }, [text, transferredIndices, baseRatio, isCustomRatioActive, calculate]);
+  }, [text, sectionsSelections, baseRatio, isCustomRatioActive, totalSectionsCount, activeSectionIndex, calculate]);
 
+  // 🔵 تبديل حالة خانة بزر انتقال الخانات في القسم المعروض حالياً
   const toggleSlot = useCallback(
-    (index: number) => {
+    (slotIndex: number) => {
       if (!result) return;
-      const current = result.transferredIndices;
-      const next = current.includes(index)
-        ? current.filter(i => i !== index)
-        : [...current, index].sort((a, b) => a - b);
+      const currentSection = result.currentSection;
+      const currentSelected = currentSection.selectedIndices;
+      const nextSelected = currentSelected.includes(slotIndex)
+        ? currentSelected.filter(i => i !== slotIndex)
+        : [...currentSelected, slotIndex].sort((a, b) => a - b);
 
-      setTransferredIndices(next);
+      const secIdx0 = result.currentSectionIndex - 1;
+      const nextSectionsSelections = [...sectionsSelections];
+      nextSectionsSelections[secIdx0] = nextSelected;
+      setSectionsSelections(nextSectionsSelections);
+
       try {
         const ratioToUse = isCustomRatioActive
           ? { num: baseRatio.num || BASE_VALUE.toString(), den: baseRatio.den || '1' }
           : { num: BASE_VALUE.toString(), den: '1' };
-        const updated = calculateTwoPhases(text, next, ratioToUse);
+
+        const updated = calculateMultiSection(
+          text,
+          ratioToUse,
+          nextSectionsSelections,
+          totalSectionsCount,
+          activeSectionIndex
+        );
         setResult(updated);
       } catch (err) {
         console.error('Error toggling slot:', err);
       }
     },
-    [result, text, baseRatio, isCustomRatioActive]
+    [result, text, baseRatio, isCustomRatioActive, sectionsSelections, totalSectionsCount, activeSectionIndex]
   );
 
   const selectAll = useCallback(() => {
     if (!result) return;
-    const all = result.resultRows.map((_, i) => i);
-    setTransferredIndices(all);
+    const all = result.currentSection.rows.map((_, i) => i);
+    const secIdx0 = result.currentSectionIndex - 1;
+    const nextSectionsSelections = [...sectionsSelections];
+    nextSectionsSelections[secIdx0] = all;
+    setSectionsSelections(nextSectionsSelections);
+
     try {
       const ratioToUse = isCustomRatioActive
         ? { num: baseRatio.num || BASE_VALUE.toString(), den: baseRatio.den || '1' }
         : { num: BASE_VALUE.toString(), den: '1' };
-      const updated = calculateTwoPhases(text, all, ratioToUse);
+
+      const updated = calculateMultiSection(
+        text,
+        ratioToUse,
+        nextSectionsSelections,
+        totalSectionsCount,
+        activeSectionIndex
+      );
       setResult(updated);
     } catch (err) {
       console.error('Error selecting all:', err);
     }
-  }, [result, text, baseRatio, isCustomRatioActive]);
+  }, [result, text, baseRatio, isCustomRatioActive, sectionsSelections, totalSectionsCount, activeSectionIndex]);
 
   const deselectAll = useCallback(() => {
     if (!result) return;
-    setTransferredIndices([]);
+    const secIdx0 = result.currentSectionIndex - 1;
+    const nextSectionsSelections = [...sectionsSelections];
+    nextSectionsSelections[secIdx0] = [];
+    setSectionsSelections(nextSectionsSelections);
+
     try {
       const ratioToUse = isCustomRatioActive
         ? { num: baseRatio.num || BASE_VALUE.toString(), den: baseRatio.den || '1' }
         : { num: BASE_VALUE.toString(), den: '1' };
-      const updated = calculateTwoPhases(text, [], ratioToUse);
+
+      const updated = calculateMultiSection(
+        text,
+        ratioToUse,
+        nextSectionsSelections,
+        totalSectionsCount,
+        activeSectionIndex
+      );
       setResult(updated);
     } catch (err) {
       console.error('Error deselecting all:', err);
     }
-  }, [result, text, baseRatio, isCustomRatioActive]);
+  }, [result, text, baseRatio, isCustomRatioActive, sectionsSelections, totalSectionsCount, activeSectionIndex]);
 
   const invertSelection = useCallback(() => {
     if (!result) return;
-    const current = result.transferredIndices;
-    const inverted = result.resultRows
+    const current = result.currentSection.selectedIndices;
+    const inverted = result.currentSection.rows
       .map((_, i) => i)
       .filter(i => !current.includes(i));
 
-    setTransferredIndices(inverted);
+    const secIdx0 = result.currentSectionIndex - 1;
+    const nextSectionsSelections = [...sectionsSelections];
+    nextSectionsSelections[secIdx0] = inverted;
+    setSectionsSelections(nextSectionsSelections);
+
     try {
       const ratioToUse = isCustomRatioActive
         ? { num: baseRatio.num || BASE_VALUE.toString(), den: baseRatio.den || '1' }
         : { num: BASE_VALUE.toString(), den: '1' };
-      const updated = calculateTwoPhases(text, inverted, ratioToUse);
+
+      const updated = calculateMultiSection(
+        text,
+        ratioToUse,
+        nextSectionsSelections,
+        totalSectionsCount,
+        activeSectionIndex
+      );
       setResult(updated);
     } catch (err) {
       console.error('Error inverting selection:', err);
     }
-  }, [result, text, baseRatio, isCustomRatioActive]);
+  }, [result, text, baseRatio, isCustomRatioActive, sectionsSelections, totalSectionsCount, activeSectionIndex]);
+
+  // 🔵 زر إضافة قسم جديد: يرحل ناتج القسم السابق، ويُخفي القسم السابق ويُظهر القسم الجديد فقط
+  const addSection = useCallback(() => {
+    if (!text.trim() || !result) return;
+    const nextCount = totalSectionsCount + 1;
+    const nextActiveIndex = nextCount;
+
+    setTotalSectionsCount(nextCount);
+    setActiveSectionIndex(nextActiveIndex);
+
+    // الخانات للقسم الجديد تكون افتراضياً كافة الخانات
+    const nextSelections = [...sectionsSelections];
+    nextSelections[nextCount - 1] = result.normalizedChars.map((_, i) => i);
+    setSectionsSelections(nextSelections);
+
+    calculate(text, nextSelections, baseRatio, isCustomRatioActive, nextCount, nextActiveIndex);
+  }, [text, result, totalSectionsCount, sectionsSelections, baseRatio, isCustomRatioActive, calculate]);
+
+  // حذف آخر قسم والرجوع للقسم السابق
+  const removeLastSection = useCallback(() => {
+    if (totalSectionsCount <= 1) return;
+    const nextCount = totalSectionsCount - 1;
+    const nextActiveIndex = Math.min(activeSectionIndex, nextCount);
+
+    setTotalSectionsCount(nextCount);
+    setActiveSectionIndex(nextActiveIndex);
+
+    const nextSelections = sectionsSelections.slice(0, nextCount);
+    setSectionsSelections(nextSelections);
+
+    calculate(text, nextSelections, baseRatio, isCustomRatioActive, nextCount, nextActiveIndex);
+  }, [totalSectionsCount, activeSectionIndex, sectionsSelections, text, baseRatio, isCustomRatioActive, calculate]);
+
+  // التنقل لعرض قسم معين فقط
+  const setActiveSection = useCallback(
+    (targetIdx: number) => {
+      if (targetIdx < 1 || targetIdx > totalSectionsCount) return;
+      setActiveSectionIndex(targetIdx);
+      if (result) {
+        calculate(text, sectionsSelections, baseRatio, isCustomRatioActive, totalSectionsCount, targetIdx);
+      }
+    },
+    [totalSectionsCount, result, text, sectionsSelections, baseRatio, isCustomRatioActive, calculate]
+  );
 
   const reset = useCallback(() => {
     setTextState('');
     setResult(null);
-    setTransferredIndices([]);
+    setTotalSectionsCount(1);
+    setActiveSectionIndex(1);
+    setSectionsSelections([]);
     setBaseRatio({ num: BASE_VALUE.toString(), den: '1' });
     setIsCustomRatioActive(true);
     setError('');
   }, []);
+
+  const transferredIndices = result ? result.currentSection.selectedIndices : [];
 
   return {
     text,
@@ -246,5 +362,10 @@ export function useWordCalculator(initialText = ''): UseWordCalculatorReturn {
     deselectAll,
     invertSelection,
     reset,
+    totalSectionsCount,
+    activeSectionIndex,
+    addSection,
+    removeLastSection,
+    setActiveSection,
   };
 }
