@@ -93,10 +93,12 @@ export default function ResultView({
       <div
         dir="ltr"
         style={{ direction: 'ltr', unicodeBidi: 'isolate' }}
-        className="p-3.5 bg-white text-slate-900 rounded-xl border border-slate-200 flex flex-wrap items-center justify-center gap-2 font-mono text-base sm:text-lg shadow-sm"
+        className="p-3.5 bg-white text-slate-900 rounded-xl border border-slate-200 flex flex-wrap items-center justify-center gap-2 font-mono text-base sm:text-lg shadow-sm w-full min-w-0"
       >
-        <span className="text-slate-950 font-black">{intPart}.</span>
-        <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-slate-50 px-2.5 sm:px-3 py-1 rounded-lg border border-slate-200">
+        <span className="text-slate-950 font-black break-all max-w-full text-center leading-relaxed">
+          {intPart}.
+        </span>
+        <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-slate-50 px-2.5 sm:px-3 py-1 rounded-lg border border-slate-200 flex-shrink-0">
           {digits.map((digit, idx) => (
             <div key={idx} className="flex flex-col items-center">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mb-1" />
@@ -104,7 +106,7 @@ export default function ResultView({
             </div>
           ))}
         </div>
-        <span className="text-slate-400 font-bold tracking-widest text-sm">...</span>
+        <span className="text-slate-400 font-bold tracking-widest text-sm flex-shrink-0">...</span>
       </div>
     );
   };
@@ -513,14 +515,14 @@ export default function ResultView({
               </span>
               <span
                 dir="ltr"
-                className="font-mono text-base sm:text-lg font-black text-emerald-900 bg-emerald-50 px-3 py-0.5 rounded-lg border border-emerald-200 inline-block self-end sm:self-auto"
+                className="font-mono text-base sm:text-lg font-black text-emerald-900 bg-emerald-50 px-3 py-0.5 rounded-lg border border-emerald-200 inline-block self-end sm:self-auto break-all max-w-full"
               >
                 {currentSection.selectedSumDisplay}
               </span>
             </div>
 
             {/* تفاصيل الجمع الكسري */}
-            <div className="text-[11px] text-slate-500 font-mono px-1 overflow-x-auto" dir="ltr">
+            <div className="text-[11px] text-slate-500 font-mono px-1 break-all leading-relaxed" dir="ltr">
               {currentSection.rows
                 .filter(r => r.isSelected)
                 .map(r => r.finalFractionDisplay)
@@ -529,13 +531,13 @@ export default function ResultView({
             </div>
 
             {/* 2. أخذ الجذر التربيعي و 3. جمع أول 10 أرقام بعد الفاصلة */}
-            <div className="space-y-2 pt-1 border-t border-slate-200">
-              <div className="flex items-center justify-between flex-wrap gap-2 text-xs font-bold text-slate-800">
+            <div className="space-y-2 pt-1 border-t border-slate-200 min-w-0">
+              <div className="flex items-center justify-between flex-wrap gap-2 text-xs font-bold text-slate-800 min-w-0">
                 <span className="flex items-center gap-1.5">
-                  <Hash className="w-4 h-4 text-amber-600" />
+                  <Hash className="w-4 h-4 text-amber-600 flex-shrink-0" />
                   2. الجذر التربيعي و 3. جمع أول 10 أرقام بعد الفاصلة:
                 </span>
-                <span dir="ltr" className="font-mono text-slate-600 text-xs">
+                <span dir="ltr" className="font-mono text-slate-600 text-xs break-all max-w-full">
                   √({currentSection.selectedSumDisplay})
                 </span>
               </div>
